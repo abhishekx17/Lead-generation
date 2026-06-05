@@ -1,0 +1,14 @@
+{
+  "name": "ai-lead-gen",
+  "version": "1.0.0",
+  "description": "AI-powered Lead Generation and Management System",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "npm run dev --prefix server",
+    "client": "npm run dev --prefix client"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
