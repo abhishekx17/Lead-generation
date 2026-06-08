@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const campaignSchema = new mongoose.Schema({
   name: {
@@ -24,8 +24,8 @@ const campaignSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'running', 'completed', 'failed'],
-    default: 'pending',
+    enum: ["pending", "running", "completed", "failed"],
+    default: "pending",
   },
   totalLeads: {
     type: Number,
@@ -33,7 +33,7 @@ const campaignSchema = new mongoose.Schema({
   },
   sheetUrl: {
     type: String,
-    default: '',
+    default: "",
   },
   createdAt: {
     type: Date,
@@ -41,4 +41,4 @@ const campaignSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('Campaign', campaignSchema);
+module.exports = mongoose.model("Campaign", campaignSchema);

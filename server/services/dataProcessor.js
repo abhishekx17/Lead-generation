@@ -4,9 +4,9 @@ const EMAIL_FIND_REGEX = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/;
 const isValidEmail = (email) => EMAIL_REGEX.test(email);
 
 const normalizePhone = (phone) => {
-  if (!phone) return '';
-  let digits = phone.replace(/\D/g, '');
-  if (digits.startsWith('91') && digits.length === 12) {
+  if (!phone) return "";
+  let digits = phone.replace(/\D/g, "");
+  if (digits.startsWith("91") && digits.length === 12) {
     digits = digits.slice(2);
   }
   if (digits.length === 10) return digits;
@@ -14,12 +14,12 @@ const normalizePhone = (phone) => {
 };
 
 const trimLead = (lead) => ({
-  businessName: (lead.businessName || '').trim(),
-  email: (lead.email || '').trim().toLowerCase(),
-  phone: normalizePhone(lead.phone || ''),
-  website: (lead.website || '').trim(),
-  address: (lead.address || '').trim(),
-  industry: (lead.industry || '').trim(),
+  businessName: (lead.businessName || "").trim(),
+  email: (lead.email || "").trim().toLowerCase(),
+  phone: normalizePhone(lead.phone || ""),
+  website: (lead.website || "").trim(),
+  address: (lead.address || "").trim(),
+  industry: (lead.industry || "").trim(),
 });
 
 /**
@@ -28,7 +28,7 @@ const trimLead = (lead) => ({
  * @param {string} [targetAudience] - Used to tag the industry field
  * @returns {Array}
  */
-const processLeads = (rawLeads, targetAudience = '') => {
+const processLeads = (rawLeads, targetAudience = "") => {
   const seenEmails = new Set();
   const cleaned = [];
 
@@ -39,7 +39,7 @@ const processLeads = (rawLeads, targetAudience = '') => {
 
     if (lead.email && !isValidEmail(lead.email)) {
       const match = lead.email.match(EMAIL_FIND_REGEX);
-      lead.email = match && isValidEmail(match[0]) ? match[0] : '';
+      lead.email = match && isValidEmail(match[0]) ? match[0] : "";
     }
 
     if (!lead.email && !lead.phone) continue;
@@ -68,4 +68,9 @@ const generateLeadSummary = (leads) => ({
   withWebsite: leads.filter((l) => l.website).length,
 });
 
-module.exports = { processLeads, generateLeadSummary, isValidEmail, normalizePhone };
+module.exports = {
+  processLeads,
+  generateLeadSummary,
+  isValidEmail,
+  normalizePhone,
+};
