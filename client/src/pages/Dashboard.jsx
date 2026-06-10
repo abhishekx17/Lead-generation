@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight01Icon,
@@ -66,6 +66,7 @@ function AnimatedNumber({ value }) {
 function useGreeting() {
   const compute = () => {
     const hour = new Date().getHours();
+    if (hour >= 0 && hour < 5) return 'Burning the midnight oil';
     if (hour < 12) return 'Good morning';
     if (hour < 17) return 'Good afternoon';
     return 'Good evening';
@@ -80,8 +81,107 @@ function useGreeting() {
   return greeting;
 }
 
+const motivationQuotes = [
+  'Go to market with unique leads.',
+  'Consistency builds campaigns that convert.',
+  'Small wins compound into big growth.',
+  'Reach the right lead, not every lead.',
+  'Sharp targeting beats noisy outreach.',
+  'One good lead can change the week.',
+  'Clarity turns effort into pipeline.',
+  'Momentum starts with a single action.',
+  'Better leads make better outcomes.',
+  'Sell to the right person faster.',
+  'Precision beats volume every time.',
+  'Keep refining until the message clicks.',
+  'Today’s outreach can fund tomorrow’s growth.',
+  'The next lead might be your best one.',
+  'Focus creates cleaner conversions.',
+  'Lead quality compounds like interest.',
+  'Strong signals deserve fast follow-up.',
+  'Make every touchpoint count.',
+  'Growth is built in consistent reps.',
+  'A focused list beats a noisy crowd.',
+  'Find intent, then move quickly.',
+  'Every campaign teaches the next one.',
+  'Good targeting saves great teams time.',
+  'Progress loves a repeatable process.',
+  'The sharper the list, the stronger the reply.',
+  'Catch demand while it is still warm.',
+  'Keep the pipeline moving forward.',
+  'The best growth is intentional growth.',
+  'Move with confidence and clean data.',
+  'Shorten the path from lead to close.',
+  'Your next insight may come from one call.',
+  'Build demand around real need.',
+  'Simple outreach often works best.',
+  'Good systems create steady wins.',
+  'Stay close to the signal.',
+  'Better targeting reduces wasted motion.',
+  'Win with relevance, not noise.',
+  'Consistency makes opportunity visible.',
+  'Every qualified lead is leverage.',
+  'Grow the list, then grow the business.',
+  'Strong positioning attracts better responses.',
+  'Narrow the audience, sharpen the message.',
+  'Build trust before you build scale.',
+  'The right timing changes everything.',
+  'Lead with value and follow with speed.',
+  'Small improvements create large returns.',
+  'Focus on buyers who already need you.',
+  'Refined outreach leads to refined results.',
+  'Make the market recognize your value.',
+  'A clean pipeline is a powerful thing.',
+  'Target well and the market responds.',
+];
+
+function useRotatingQuote() {
+  const [quoteIndex, setQuoteIndex] = useState(() => Math.floor(Math.random() * motivationQuotes.length));
+  const [previousQuoteIndex, setPreviousQuoteIndex] = useState(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const currentQuoteIndexRef = useRef(quoteIndex);
+  const blurTimerRef = useRef(null);
+
+  useEffect(() => {
+    currentQuoteIndexRef.current = quoteIndex;
+  }, [quoteIndex]);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      const currentIndex = currentQuoteIndexRef.current;
+      setPreviousQuoteIndex(currentIndex);
+      setIsTransitioning(true);
+      setQuoteIndex((current) => {
+        let next = current;
+        while (next === current) {
+          next = Math.floor(Math.random() * motivationQuotes.length);
+        }
+        return next;
+      });
+
+      if (blurTimerRef.current) clearTimeout(blurTimerRef.current);
+      blurTimerRef.current = setTimeout(() => {
+        setPreviousQuoteIndex(null);
+        setIsTransitioning(false);
+      }, 700);
+    }, 10000);
+
+    return () => {
+      clearInterval(id);
+      if (blurTimerRef.current) clearTimeout(blurTimerRef.current);
+    };
+  }, []);
+
+  return {
+    currentQuote: motivationQuotes[quoteIndex],
+    previousQuote: previousQuoteIndex === null ? null : motivationQuotes[previousQuoteIndex],
+    isTransitioning,
+  };
+}
+
 export default function Dashboard() {
   const greeting = useGreeting();
+  const { currentQuote, previousQuote, isTransitioning } = useRotatingQuote();
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -156,6 +256,27 @@ export default function Dashboard() {
           </Link>
         }
       />
+      <div className="rounded-2xl border border-hairline bg-surface-soft px-5 py-4">
+        <p className="caption-uppercase text-[11px] font-semibold tracking-wider text-muted">Daily motivation</p>
+        <div className="relative mt-2 min-h-8 overflow-hidden">
+          {previousQuote && (
+            <p
+              className={`absolute inset-0 text-sm md:text-base font-medium text-body leading-relaxed ${
+                isTransitioning ? 'quote-blur-out' : 'opacity-0'
+              }`}
+            >
+              {previousQuote}
+            </p>
+          )}
+          <p
+            className={`text-sm md:text-base font-medium text-ink leading-relaxed ${
+              isTransitioning ? 'quote-blur-in' : 'quote-clear'
+            }`}
+          >
+            {currentQuote}
+          </p>
+        </div>
+      </div>
 
       {/* Stat cards — solid surface background, no shadow, hairline border */}
       <div className="grid gap-5 sm:grid-cols-3">

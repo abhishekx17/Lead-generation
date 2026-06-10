@@ -416,3 +416,46 @@ body {
   background: linear-gradient(180deg, var(--color-brand-lavender), var(--color-brand-peach));
   transition: all 0.2s ease;
 }
+
+/* ─── Quote transition ─────────────────────────────────── */
+
+.quote-clear {
+  opacity: 1;
+  filter: blur(0);
+  transform: translateY(0);
+  transition: opacity 0.35s ease, filter 0.35s ease, transform 0.35s ease;
+}
+
+.quote-blur-in {
+  animation: quoteBlurIn 0.7s ease both;
+}
+
+.quote-blur-out {
+  animation: quoteBlurOut 0.7s ease both;
+}
+
+@keyframes quoteBlurIn {
+  0% {
+    opacity: 0;
+    filter: blur(10px);
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+@keyframes quoteBlurOut {
+  0% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    filter: blur(10px);
+    transform: translateY(-6px);
+  }
+}
