@@ -1,14 +1,17 @@
 export default function PageHeader({ eyebrow, title, description, action }) {
   return (
-    <div className="animate-fade-in-up flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-      <div>
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-hairline pb-6">
+      <div className="space-y-1">
         {eyebrow && (
-          <p className="caption-uppercase mb-2 text-muted">{eyebrow}</p>
+          <p className="caption-uppercase text-xs font-semibold tracking-wider text-muted">
+            {eyebrow}
+          </p>
         )}
-        <h1 className="display-sm">{title}</h1>
-        <div className="gradient-accent-line mt-3" />
+        <h1 className="text-3xl md:text-[36px] font-medium text-ink" style={{ letterSpacing: '-0.04em', lineHeight: 1.15 }}>
+          {title}
+        </h1>
         {description && (
-          <p className="mt-3 max-w-2xl text-base text-muted leading-relaxed">
+          <p className="max-w-2xl text-sm md:text-base text-muted leading-relaxed pt-1">
             {description}
           </p>
         )}

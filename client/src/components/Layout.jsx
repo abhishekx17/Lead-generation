@@ -1,20 +1,21 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
-  Chart21,
-  HamburgerMenu,
-  MessageText1,
-  Radar2,
-  CloseCircle,
-  Flash,
-  Sun,
-  Moon,
-} from 'iconsax-reactjs';
+  DashboardCircleIcon,
+  Menu01Icon,
+  BubbleChatIcon,
+  Radar01Icon,
+  Cancel01Icon,
+  Sun01Icon,
+  Moon01Icon,
+} from 'hugeicons-react';
+import { Menu } from 'lucide-react';
+import { gsap } from 'gsap';
 
 const links = [
-  { to: '/', label: 'Dashboard', icon: Chart21, end: true },
-  { to: '/campaigns', label: 'Campaigns', icon: Radar2 },
-  { to: '/chat', label: 'AI Chat', icon: MessageText1 },
+  { to: '/', label: 'Dashboard', icon: DashboardCircleIcon, end: true },
+  { to: '/campaigns', label: 'Campaigns', icon: Radar01Icon },
+  { to: '/chat', label: 'AI Chat', icon: BubbleChatIcon },
 ];
 
 const pageTitles = {
@@ -23,7 +24,7 @@ const pageTitles = {
   '/chat': 'AI Chat',
 };
 
-function NavItems({ onNavigate }) {
+function NavItems({ collapsed = false, onNavigate }) {
   return links.map((link) => {
     const Icon = link.icon;
     return (
@@ -32,23 +33,31 @@ function NavItems({ onNavigate }) {
         to={link.to}
         end={link.end}
         onClick={onNavigate}
+        title={collapsed ? link.label : undefined}
         className={({ isActive }) =>
-          `group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+          `sidebar-nav-item group relative flex items-center gap-3 py-2.5 text-sm font-medium transition-all duration-200 border-l-2 ${
+            collapsed ? 'justify-center px-0' : 'px-3'
+          } ${
             isActive
-              ? 'bg-surface-card text-ink shadow-[0_1px_3px_rgba(10,10,10,0.04)]'
-              : 'text-muted hover:bg-surface-card/60 hover:text-ink'
+              ? 'bg-surface-soft text-ink border-brand-teal'
+              : 'text-muted border-transparent hover:bg-surface-soft/50 hover:text-ink'
           }`
         }
+        style={{ borderRadius: '0 12px 12px 0' }}
       >
         {({ isActive }) => (
           <>
-            {isActive && <span className="nav-active-indicator" />}
-            <div className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-              isActive ? 'bg-brand-teal text-on-dark' : 'bg-surface-strong/60 text-muted group-hover:bg-surface-strong group-hover:text-ink'
-            }`}>
-              <Icon size={18} variant="Bold" />
-            </div>
-            {link.label}
+            <Icon
+              size={20}
+              className={`shrink-0 transition-colors ${isActive ? 'text-brand-teal' : 'text-muted group-hover:text-ink'}`}
+            />
+            {!collapsed && <span className="truncate">{link.label}</span>}
+            {/* Tooltip when collapsed */}
+            {collapsed && (
+              <span className="pointer-events-none absolute left-full ml-3 z-50 whitespace-nowrap rounded-lg border border-hairline bg-canvas px-2.5 py-1.5 text-xs font-medium text-ink shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                {link.label}
+              </span>
+            )}
           </>
         )}
       </NavLink>
@@ -58,8 +67,8 @@ function NavItems({ onNavigate }) {
 
 export default function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isDark, setIsDark] = useState(() => {
-    // Check local storage or system preference
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('theme');
       if (saved) return saved === 'dark';
@@ -68,9 +77,32 @@ export default function Layout() {
     return false;
   });
 
-  const { pathname } = useLocation();
-  const pageTitle = pageTitles[pathname] || 'LeadAI';
+  const location = useLocation();
+  const pageTitle = pageTitles[location.pathname] || 'LeadAI';
 
+  // Mount animation for sidebar nav items
+  useEffect(() => {
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      gsap.fromTo(
+        '.sidebar-nav-item',
+        { x: -8, opacity: 0 },
+        { x: 0, opacity: 1, duration: 0.4, stagger: 0.04, ease: 'power2.out' }
+      );
+    }
+  }, []);
+
+  // Page transition on route change
+  useEffect(() => {
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      gsap.fromTo(
+        '.page-content-wrapper',
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' }
+      );
+    }
+  }, [location.pathname]);
+
+  // Dark mode sync
   useEffect(() => {
     const root = window.document.documentElement;
     if (isDark) {
@@ -85,150 +117,133 @@ export default function Layout() {
   const toggleTheme = () => setIsDark(!isDark);
 
   return (
-    <div className="flex min-h-screen bg-canvas text-body">
-      {/* Desktop sidebar */}
-      <aside className="hidden w-[272px] shrink-0 flex-col border-r border-hairline bg-surface-soft lg:flex">
-        {/* Logo area with decorative gradient */}
-        <div className="relative border-b border-hairline px-6 py-6 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-brand-lavender/8 via-transparent to-brand-peach/8 pointer-events-none" />
-          <div className="relative flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-teal text-on-dark shadow-[0_2px_8px_-2px_rgba(26,58,58,0.4)]">
-              <Radar2 size={22} variant="Bold" />
-            </div>
-            <div>
-              <h1 className="text-lg font-semibold tracking-tight text-ink">LeadAI</h1>
-              <p className="text-[11px] font-medium text-muted">Lead Generation</p>
-            </div>
+    <div className="flex h-screen overflow-hidden bg-canvas text-body">
+
+      {/* ── Desktop sidebar ─────────────────────────────────────── */}
+      <aside
+        className="hidden lg:flex h-screen sticky top-0 shrink-0 flex-col border-r border-hairline bg-canvas overflow-hidden transition-[width] duration-300 ease-in-out"
+        style={{ width: sidebarOpen ? '240px' : '64px' }}
+      >
+        {/* Logo row — h-16 matches header */}
+        <div className="flex h-16 shrink-0 items-center border-b border-hairline px-3 gap-3 overflow-hidden">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-teal text-on-dark">
+            <Radar01Icon size={20} />
           </div>
+          {sidebarOpen && (
+            <div className="min-w-0">
+              <h1 className="text-base font-semibold tracking-tight text-ink leading-none">LeadAI</h1>
+              <p className="text-[10px] font-medium text-muted uppercase tracking-wider mt-0.5">Lead Gen</p>
+            </div>
+          )}
         </div>
 
-        <nav className="flex flex-1 flex-col gap-1 p-4">
-          <p className="caption-uppercase mb-2 px-3 text-muted-soft">Menu</p>
-          <NavItems />
+        {/* Nav */}
+        <nav className={`flex flex-1 flex-col gap-1 overflow-y-auto py-4 ${sidebarOpen ? 'pr-4' : 'pr-0'}`}>
+          {sidebarOpen && (
+            <p className="caption-uppercase mb-2 px-6 text-muted-soft">Menu</p>
+          )}
+          <NavItems collapsed={!sidebarOpen} />
         </nav>
-
-        {/* Bottom card */}
-        <div className="border-t border-hairline p-4">
-          <div className="rounded-xl bg-gradient-to-br from-brand-teal to-surface-dark p-4 text-on-dark">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/15 mb-3">
-              <Flash size={16} variant="Bold" />
-            </div>
-            <p className="text-xs font-semibold leading-snug">AI Lead Scraping</p>
-            <p className="mt-1 text-[11px] text-white/60 leading-relaxed">
-              Find prospects, enrich data & export to Google Sheets
-            </p>
-          </div>
-        </div>
       </aside>
 
-      {/* Mobile drawer */}
+      {/* ── Mobile drawer ────────────────────────────────────────── */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <button
             type="button"
             aria-label="Close menu"
-            className="modal-backdrop absolute inset-0 bg-ink/30 backdrop-blur-sm"
+            className="absolute inset-0 bg-ink/30 backdrop-blur-sm"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="animate-slide-in-left relative flex h-full w-72 flex-col bg-surface-soft shadow-2xl">
-            <div className="flex items-center justify-between border-b border-hairline px-5 py-5">
+          <aside className="relative flex h-full w-64 flex-col bg-canvas border-r border-hairline shadow-2xl">
+            <div className="flex h-16 items-center justify-between border-b border-hairline px-5">
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-teal text-on-dark">
-                  <Radar2 size={20} variant="Bold" />
+                  <Radar01Icon size={20} />
                 </div>
-                <span className="text-lg font-semibold text-ink">LeadAI</span>
+                <span className="text-base font-semibold text-ink">LeadAI</span>
               </div>
               <button
                 type="button"
                 onClick={() => setMobileOpen(false)}
-                className="rounded-lg p-2 text-muted hover:bg-surface-card hover:text-ink transition-colors"
+                className="rounded-lg p-2 text-muted hover:bg-surface-soft hover:text-ink transition-colors"
               >
-                <CloseCircle size={22} />
+                <Cancel01Icon size={20} />
               </button>
             </div>
-            <nav className="flex flex-col gap-1 p-4">
+            <nav className="flex flex-col gap-1 py-4 pr-4">
               <NavItems onNavigate={() => setMobileOpen(false)} />
             </nav>
           </aside>
         </div>
       )}
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        {/* Top bar */}
-        <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-hairline bg-canvas/90 px-4 backdrop-blur-md sm:px-6">
-          <div className="flex items-center gap-3">
+      {/* ── Right column: header + body ──────────────────────────── */}
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+
+        {/* Header — h-16 matches sidebar logo row */}
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-hairline bg-canvas px-4 sm:px-6 z-40">
+          <div className="flex items-center gap-2">
+            {/* Mobile hamburger */}
             <button
               type="button"
-              className="rounded-xl p-2 text-ink transition-colors hover:bg-surface-card lg:hidden"
+              className="rounded-xl p-2 text-ink transition-colors hover:bg-surface-soft lg:hidden"
               onClick={() => setMobileOpen(true)}
               aria-label="Open menu"
             >
-              <HamburgerMenu size={22} variant="Bold" />
+              <Menu01Icon size={20} />
             </button>
+
+            {/* Desktop sidebar toggle — lucide PanelLeft icons */}
+            <button
+              type="button"
+              onClick={() => setSidebarOpen((o) => !o)}
+              className="hidden lg:flex h-9 w-9 items-center justify-center rounded-xl text-muted hover:bg-surface-soft hover:text-ink transition-all duration-200 focus:outline-none active:scale-95 cursor-pointer"
+              aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+            >
+              <Menu size={18} />
+            </button>
+
+            {/* Mobile logo */}
             <div className="flex items-center gap-2 lg:hidden">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-teal text-on-dark">
-                <Radar2 size={16} variant="Bold" />
+                <Radar01Icon size={16} />
               </div>
               <span className="text-sm font-semibold text-ink">LeadAI</span>
             </div>
-            <div className="hidden items-center gap-2 lg:flex">
-              <span className="text-sm font-medium text-muted">{pageTitle}</span>
-            </div>
+
+            {/* Desktop breadcrumb */}
+            <span className="hidden lg:block text-sm font-medium text-muted">{pageTitle}</span>
           </div>
+
           <div className="flex items-center gap-3">
-            {/* Theme Toggle Button */}
+            {/* Theme toggle */}
             <button
               type="button"
               onClick={toggleTheme}
-              className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-hairline bg-surface-soft text-ink hover:bg-surface-card transition-all duration-300 focus:outline-none overflow-hidden active:scale-95"
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-hairline bg-canvas text-ink hover:bg-surface-soft transition-all duration-200 focus:outline-none active:scale-95 cursor-pointer"
               aria-label="Toggle theme"
             >
-              <div className="relative h-6 w-6 transition-transform duration-500 ease-out" style={{ transform: isDark ? 'rotate(180deg)' : 'rotate(0deg)' }}>
-                <span className={`absolute inset-0 flex items-center justify-center transition-all duration-500 ease-out ${
-                  isDark ? 'opacity-0 scale-50 rotate-90' : 'opacity-100 scale-100 rotate-0'
-                }`}>
-                  <Sun size={20} variant="Bold" className="text-amber-500" />
-                </span>
-                <span className={`absolute inset-0 flex items-center justify-center transition-all duration-500 ease-out ${
-                  isDark ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-50 -rotate-90'
-                }`}>
-                  <Moon size={20} variant="Bold" className="text-blue-400" />
-                </span>
-              </div>
+              {isDark
+                ? <Moon01Icon size={18} className="text-brand-lavender" />
+                : <Sun01Icon size={18} className="text-brand-ochre" />
+              }
             </button>
-
-            <span className="hidden rounded-full bg-surface-card px-3.5 py-1.5 text-xs font-medium text-muted sm:inline-flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
-              GTM Workspace
-            </span>
           </div>
         </header>
 
-        <main className="flex-1 overflow-auto">
-          <div className="page-enter mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:py-16">
+        {/* Scrollable body */}
+        <main className="flex-1 overflow-y-auto">
+          <div className="page-content-wrapper mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:py-12">
             <Outlet />
           </div>
         </main>
 
         {/* Footer */}
-        <footer className="relative border-t border-hairline bg-surface-soft px-6 py-10 overflow-hidden">
-          {/* Decorative gradient wave */}
-          <div className="absolute inset-0 bg-gradient-to-r from-brand-lavender/5 via-brand-peach/5 to-brand-ochre/5 pointer-events-none" />
-          <div className="relative mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 sm:flex-row">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-ochre/40 to-brand-peach/40">
-                <Radar2 size={18} variant="Bold" className="text-ink" />
-              </div>
-              <div>
-                <span className="text-sm font-semibold text-ink">LeadAI</span>
-                <span className="ml-2 text-xs text-muted">·</span>
-                <span className="ml-2 text-xs text-muted">Lead Generation Platform</span>
-              </div>
-            </div>
-            <p className="text-sm text-muted">
-              Turn your growth ideas into reality — one campaign at a time.
-            </p>
-          </div>
+        <footer className="shrink-0 border-t border-hairline px-6 py-3">
+          <p className="text-xs text-muted text-center">
+            © {new Date().getFullYear()} LeadAI
+          </p>
         </footer>
       </div>
     </div>

@@ -1,10 +1,10 @@
 const variants = {
   primary:
-    'bg-primary text-on-primary border border-primary hover:shadow-[0_4px_16px_-2px_rgba(10,10,10,0.25)] active:scale-[0.97]',
+    'bg-primary text-on-primary border border-primary active:scale-[0.97]',
   secondary:
-    'bg-canvas text-ink border border-hairline hover:border-muted-soft hover:shadow-[0_2px_8px_-2px_rgba(10,10,10,0.08)] active:scale-[0.97]',
+    'bg-transparent text-ink border border-hairline active:scale-[0.97] hover:bg-surface-soft',
   onColor:
-    'bg-on-primary text-ink border border-on-primary hover:shadow-[0_4px_12px_-2px_rgba(255,255,255,0.3)] active:scale-[0.97]',
+    'bg-white text-[#0a0a0a] border border-transparent active:scale-[0.97] hover:bg-white/90',
   ghost:
     'bg-transparent text-muted border border-transparent hover:bg-surface-soft hover:text-ink active:scale-[0.97]',
   danger:
@@ -12,8 +12,8 @@ const variants = {
 };
 
 const sizes = {
-  sm: 'h-9 px-3.5 text-[13px] gap-1.5 rounded-[10px]',
-  md: 'h-11 px-5 text-sm gap-2 rounded-xl',
+  sm: 'h-9 px-3.5 text-[13px] gap-1.5 rounded-xl',
+  md: 'h-11 px-5 text-sm gap-2 rounded-xl', // 12px radius = rounded-xl (Vite-Tailwind default)
   lg: 'h-12 px-7 text-sm gap-2.5 rounded-xl',
 };
 
@@ -30,12 +30,12 @@ export default function Button({
   return (
     <button
       type={type}
-      className={`inline-flex items-center justify-center font-semibold transition-all duration-200 ease-out disabled:opacity-50 disabled:pointer-events-none cursor-pointer select-none ${variants[variant]} ${sizes[size]} ${className}`}
+      className={`inline-flex items-center justify-center font-semibold transition-all duration-150 ease-out disabled:opacity-50 disabled:pointer-events-none cursor-pointer select-none ${variants[variant]} ${sizes[size]} ${className}`}
       {...props}
     >
-      {Icon && iconPosition === 'left' && <Icon size={18} variant="Bold" />}
+      {Icon && iconPosition === 'left' && <Icon size={18} />}
       {children}
-      {Icon && iconPosition === 'right' && <Icon size={18} variant="Bold" />}
+      {Icon && iconPosition === 'right' && <Icon size={18} />}
     </button>
   );
 }

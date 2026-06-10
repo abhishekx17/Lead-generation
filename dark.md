@@ -7,7 +7,7 @@ description: A sober, editorial workflow-software interface anchored on white ca
 colors:
   primary: "#181d26"
   primary-active: "#0d1218"
-  ink: "#181d26"
+  ink: "#181d26"`
   body: "#333840"
   muted: "#41454d"
   hairline: "#dddddd"

@@ -1,40 +1,41 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  ArrowRight2,
-  Chart21,
-  People,
-  Radar2,
-  TrendUp,
-  MessageText1,
-} from 'iconsax-reactjs';
+  ArrowRight01Icon,
+  DashboardCircleIcon,
+  UserGroupIcon,
+  Radar01Icon,
+  ChartIncreaseIcon,
+  BubbleChatIcon,
+} from 'hugeicons-react';
 import { getCampaigns } from '../api';
 import StatusBadge from '../components/StatusBadge';
 import PageHeader from '../components/ui/PageHeader';
 import Button from '../components/ui/Button';
 import Alert from '../components/ui/Alert';
+import { gsap } from 'gsap';
 
 const statCards = [
   {
     label: 'Total Campaigns',
     key: 'campaigns',
-    icon: Radar2,
-    iconBg: 'bg-black/[0.04]',
-    iconColor: 'text-ink/80',
+    icon: Radar01Icon,
+    iconBg: 'bg-brand-peach/10',
+    iconColor: 'text-brand-peach',
   },
   {
     label: 'Total Leads',
     key: 'leads',
-    icon: People,
-    iconBg: 'bg-black/[0.04]',
-    iconColor: 'text-ink/80',
+    icon: UserGroupIcon,
+    iconBg: 'bg-brand-lavender/15',
+    iconColor: 'text-brand-lavender',
   },
   {
     label: 'Active Campaigns',
     key: 'active',
-    icon: TrendUp,
-    iconBg: 'bg-black/[0.04]',
-    iconColor: 'text-ink/80',
+    icon: ChartIncreaseIcon,
+    iconBg: 'bg-brand-teal/10',
+    iconColor: 'text-brand-teal',
   },
 ];
 
@@ -62,14 +63,25 @@ function AnimatedNumber({ value }) {
   return <>{display}</>;
 }
 
-function getGreeting() {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Good morning';
-  if (hour < 17) return 'Good afternoon';
-  return 'Good evening';
+function useGreeting() {
+  const compute = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  };
+  const [greeting, setGreeting] = useState(compute);
+  useEffect(() => {
+    // re-evaluate on the minute boundary
+    const tick = () => setGreeting(compute());
+    const id = setInterval(tick, 60_000);
+    return () => clearInterval(id);
+  }, []);
+  return greeting;
 }
 
 export default function Dashboard() {
+  const greeting = useGreeting();
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -80,6 +92,24 @@ export default function Dashboard() {
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, []);
+
+  // GSAP animation for stat cards and page elements
+  useEffect(() => {
+    if (!loading && !error) {
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        gsap.fromTo(
+          '.stat-card-anim',
+          { y: 12, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.4, stagger: 0.06, ease: 'power2.out' }
+        );
+        gsap.fromTo(
+          '.recent-activity-anim',
+          { y: 16, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.5, delay: 0.2, ease: 'power2.out' }
+        );
+      }
+    }
+  }, [loading, error]);
 
   const totalLeads = campaigns.reduce((sum, c) => sum + (c.totalLeads || 0), 0);
   const activeCampaigns = campaigns.filter(
@@ -94,7 +124,7 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-12">
         <div className="space-y-3">
           <div className="skeleton h-4 w-24" />
           <div className="skeleton h-8 w-72" />
@@ -114,35 +144,35 @@ export default function Dashboard() {
     return <Alert type="error">{error}</Alert>;
   }
 
+
   return (
     <div className="space-y-12">
       <PageHeader
-        eyebrow={getGreeting()}
+        eyebrow={greeting}
         title="Go to market with unique leads"
-        description="Track campaigns, monitor scraping progress, and export enriched lead data to Google Sheets."
         action={
           <Link to="/campaigns">
-            <Button icon={Radar2}>New Campaign</Button>
+            <Button icon={Radar01Icon}>New Campaign</Button>
           </Link>
         }
       />
 
-      {/* Stat cards — clean white with colored accent */}
+      {/* Stat cards — solid surface background, no shadow, hairline border */}
       <div className="grid gap-5 sm:grid-cols-3">
-        {statCards.map((stat, index) => {
+        {statCards.map((stat) => {
           const Icon = stat.icon;
           return (
             <div
               key={stat.key}
-              className={`animate-fade-in-up delay-${index + 1} group rounded-2xl border border-hairline bg-canvas p-6 shadow-[0_1px_3px_rgba(10,10,10,0.04)] hover-lift`}
+              className="stat-card-anim opacity-0 rounded-2xl border border-hairline bg-surface-soft p-6 transition-all duration-200"
             >
-              <div className="flex items-start justify-between">
-                <p className="text-sm font-medium text-muted">{stat.label}</p>
-                <div className={`rounded-xl p-2.5 ${stat.iconBg} transition-transform duration-300 group-hover:scale-110`}>
-                  <Icon size={20} variant="Bold" className={stat.iconColor} />
+              <div className="flex items-center justify-between">
+                <span className="caption-uppercase text-[11px] tracking-wider text-muted font-semibold">{stat.label}</span>
+                <div className={`rounded-xl p-2 ${stat.iconBg}`}>
+                  <Icon size={18} className={stat.iconColor} />
                 </div>
               </div>
-              <p className="mt-3 text-4xl font-semibold tracking-tight text-ink">
+              <p className="mt-3 text-[32px] font-medium tracking-tight text-ink leading-none">
                 <AnimatedNumber value={statValues[stat.key]} />
               </p>
             </div>
@@ -151,11 +181,11 @@ export default function Dashboard() {
       </div>
 
       {/* Recent campaigns table */}
-      <section className="animate-fade-in-up delay-4">
-        <div className="mb-6 flex items-center justify-between">
+      <section className="recent-activity-anim opacity-0 space-y-5">
+        <div className="flex items-end justify-between">
           <div>
-            <p className="caption-uppercase text-muted">Recent activity</p>
-            <h2 className="mt-1 text-xl font-semibold tracking-tight text-ink">
+            <p className="caption-uppercase text-xs font-semibold tracking-wider text-muted">Recent activity</p>
+            <h2 className="mt-1 text-2xl font-semibold tracking-tight text-ink">
               Recent Campaigns
             </h2>
           </div>
@@ -164,15 +194,15 @@ export default function Dashboard() {
             className="inline-flex items-center gap-1 text-sm font-semibold text-ink underline-offset-4 hover:underline transition-colors"
           >
             View all
-            <ArrowRight2 size={16} />
+            <ArrowRight01Icon size={16} />
           </Link>
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-hairline bg-canvas shadow-[0_1px_3px_rgba(10,10,10,0.03)]">
+        <div className="overflow-hidden rounded-2xl border border-hairline bg-canvas">
           {campaigns.length === 0 ? (
             <div className="px-6 py-20 text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-surface-card animate-float">
-                <Radar2 size={28} variant="Bold" className="text-muted" />
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-surface-soft animate-float">
+                <Radar01Icon size={24} className="text-muted" />
               </div>
               <p className="text-lg font-medium text-ink">No campaigns yet</p>
               <p className="mt-1 text-sm text-muted">Create your first campaign to start generating leads.</p>
@@ -183,42 +213,42 @@ export default function Dashboard() {
               </Link>
             </div>
           ) : (
-            <div className="overflow-x-auto table-row-hover">
+            <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-hairline bg-surface-soft/80 text-muted">
-                    <th className="px-6 py-3.5 font-semibold">Name</th>
-                    <th className="px-6 py-3.5 font-semibold">Location</th>
-                    <th className="px-6 py-3.5 font-semibold">Target</th>
-                    <th className="px-6 py-3.5 font-semibold">Leads</th>
-                    <th className="px-6 py-3.5 font-semibold">Status</th>
-                    <th className="px-6 py-3.5 font-semibold">Actions</th>
+                  <tr className="border-b border-hairline bg-surface-soft text-muted">
+                    <th className="px-6 py-4 caption-uppercase text-[11px] font-semibold tracking-wider">Name</th>
+                    <th className="px-6 py-4 caption-uppercase text-[11px] font-semibold tracking-wider">Location</th>
+                    <th className="px-6 py-4 caption-uppercase text-[11px] font-semibold tracking-wider">Target</th>
+                    <th className="px-6 py-4 caption-uppercase text-[11px] font-semibold tracking-wider">Leads</th>
+                    <th className="px-6 py-4 caption-uppercase text-[11px] font-semibold tracking-wider">Status</th>
+                    <th className="px-6 py-4 caption-uppercase text-[11px] font-semibold tracking-wider">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {campaigns.slice(0, 10).map((campaign) => (
+                  {campaigns.slice(0, 5).map((campaign) => (
                     <tr
                       key={campaign._id}
-                      className="border-b border-hairline/60 text-body last:border-0 transition-colors"
+                      className="border-b border-hairline/60 text-body last:border-0 hover:bg-surface-soft/40 transition-colors"
                     >
-                      <td className="px-6 py-4 font-semibold text-ink">
+                      <td className="px-6 py-4.5 font-semibold text-ink">
                         {campaign.name}
                       </td>
-                      <td className="px-6 py-4">{campaign.location}</td>
-                      <td className="px-6 py-4">{campaign.targetAudience}</td>
-                      <td className="px-6 py-4">
-                        <span className="font-medium text-ink">{campaign.totalLeads || 0}</span>
+                      <td className="px-6 py-4.5">{campaign.location}</td>
+                      <td className="px-6 py-4.5">{campaign.targetAudience}</td>
+                      <td className="px-6 py-4.5">
+                        <span className="font-semibold text-ink">{campaign.totalLeads || 0}</span>
                       </td>
-                      <td className="px-6 py-4">
-                        <StatusBadge status={campaign.status} />
+                      <td className="px-6 py-4.5">
+                        <StatusBadge status={campaign.status} surface="default" />
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4.5">
                         <Link
                           to="/campaigns"
-                          className="inline-flex items-center gap-1 rounded-lg bg-surface-card px-3 py-1.5 text-xs font-semibold text-ink transition-colors hover:bg-surface-strong"
+                          className="inline-flex items-center gap-1 rounded-lg bg-surface-soft border border-hairline px-3 py-1.5 text-xs font-semibold text-ink transition-colors hover:bg-surface-strong"
                         >
                           Manage
-                          <ArrowRight2 size={14} />
+                          <ArrowRight01Icon size={14} />
                         </Link>
                       </td>
                     </tr>
@@ -231,21 +261,21 @@ export default function Dashboard() {
       </section>
 
       {/* CTA band */}
-      <section className="animate-fade-in-up delay-5 overflow-hidden rounded-2xl border border-hairline bg-surface-soft p-10 sm:p-14 shadow-[0_1px_3px_rgba(10,10,10,0.03)]">
+      <section className="recent-activity-anim opacity-0 overflow-hidden rounded-3xl border border-hairline bg-surface-soft p-10 sm:p-14">
         <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-on-primary mb-5">
-              <MessageText1 size={22} variant="Bold" />
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-teal text-white mb-5">
+              <BubbleChatIcon size={20} />
             </div>
-            <h2 className="display-md max-w-lg">
+            <h2 className="text-2xl md:text-3xl font-medium text-ink tracking-tight" style={{ letterSpacing: '-0.03em' }}>
               Turn your growth ideas into reality today
             </h2>
-            <p className="mt-3 max-w-md text-muted leading-relaxed">
+            <p className="mt-2.5 max-w-lg text-sm md:text-base text-muted leading-relaxed">
               Ask AI about your leads, filter by location, and discover your best-performing campaigns.
             </p>
           </div>
-          <Link to="/chat">
-            <Button icon={ArrowRight2} iconPosition="right" size="lg">
+          <Link to="/chat" className="shrink-0">
+            <Button icon={ArrowRight01Icon} iconPosition="right" size="lg">
               Open AI Chat
             </Button>
           </Link>
