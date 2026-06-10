@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Add01Icon,
+  Cancel01Icon,
   Download01Icon,
   Location01Icon,
   UserGroupIcon,
