@@ -1,18 +1,33 @@
-const styles = {
-  pending: 'bg-slate-700 text-slate-300',
-  running: 'bg-blue-500/20 text-blue-400 border border-blue-500/40',
-  completed: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40',
-  failed: 'bg-red-500/20 text-red-400 border border-red-500/40',
+import { Clock, TickCircle, CloseCircle, Refresh } from 'iconsax-reactjs';
+
+const config = {
+  pending: {
+    icon: Clock,
+    className: 'bg-surface-strong text-muted border-hairline',
+  },
+  running: {
+    icon: Refresh,
+    className: 'bg-brand-mint/30 text-brand-teal border-brand-mint/50 animate-pulse-ring',
+    spin: true,
+  },
+  completed: {
+    icon: TickCircle,
+    className: 'bg-success/15 text-success border-success/25',
+  },
+  failed: {
+    icon: CloseCircle,
+    className: 'bg-error/10 text-error border-error/25',
+  },
 };
 
 export default function StatusBadge({ status }) {
+  const { icon: Icon, className, spin } = config[status] || config.pending;
+
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${styles[status] || styles.pending}`}
+      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold capitalize transition-colors ${className}`}
     >
-      {status === 'running' && (
-        <span className="mr-1.5 h-1.5 w-1.5 animate-pulse rounded-full bg-blue-400" />
-      )}
+      <Icon size={14} variant="Bold" className={spin ? 'animate-spin' : ''} />
       {status}
     </span>
   );

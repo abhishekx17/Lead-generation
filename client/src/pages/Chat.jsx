@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
+import { MessageText1, Send2, Cpu, MagicStar } from 'iconsax-reactjs';
 import { getCampaigns, sendChatMessage } from '../api';
 import MarkdownMessage from '../components/MarkdownMessage';
+import PageHeader from '../components/ui/PageHeader';
+import Button from '../components/ui/Button';
+import { Select } from '../components/ui/Input';
 
 const SUGGESTIONS = [
   'How many leads do I have?',
@@ -52,16 +56,17 @@ export default function Chat() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-8.5rem)] flex-col">
-      <div className="mb-4 flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-white">AI Chat</h2>
-          <p className="text-slate-400">Ask questions about your leads in plain English</p>
-        </div>
-        <select
+    <div className="flex h-[calc(100vh-12rem)] flex-col">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <PageHeader
+          eyebrow="AI Assistant"
+          title="Ask about your leads"
+          description="Query campaigns, locations, and contact data in plain English."
+        />
+        <Select
           value={campaignId}
           onChange={(e) => setCampaignId(e.target.value)}
-          className="rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+          className="min-w-[200px]"
         >
           <option value="">All Campaigns</option>
           {campaigns.map((c) => (
@@ -69,81 +74,114 @@ export default function Chat() {
               {c.name}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      {/* Suggestion chips */}
+      <div className="mb-4 flex flex-wrap gap-2">
         {SUGGESTIONS.map((q) => (
           <button
             key={q}
             type="button"
             onClick={() => sendMessage(q)}
             disabled={loading}
-            className="rounded-full border border-slate-700 bg-slate-800 px-3 py-1 text-xs text-slate-300 hover:border-blue-500/50 hover:text-blue-400 disabled:opacity-50"
+            className="group rounded-full border border-hairline bg-surface-card px-4 py-2 text-xs font-medium text-body transition-all duration-200 hover:border-brand-lavender/40 hover:bg-surface-card hover:text-ink hover:shadow-[0_2px_8px_-2px_rgba(184,164,237,0.2)] disabled:opacity-50 active:scale-[0.97]"
           >
-            {q}
+            <span className="flex items-center gap-1.5">
+              <MagicStar size={12} variant="Bold" className="text-brand-lavender opacity-0 transition-opacity group-hover:opacity-100" />
+              {q}
+            </span>
           </button>
         ))}
       </div>
 
-      <div className="mt-4 flex-1 space-y-4 overflow-y-auto rounded-xl border border-slate-800 bg-slate-900 p-4">
-        {messages.length === 0 && (
-          <p className="text-center text-sm text-slate-500">
-            Ask a question about your leads to get started.
-          </p>
-        )}
+      {/* Chat container */}
+      <div className="flex flex-1 flex-col overflow-hidden rounded-2xl border border-hairline bg-canvas shadow-[0_1px_3px_rgba(10,10,10,0.03)]">
+        <div className="flex-1 space-y-5 overflow-y-auto p-6">
+          {messages.length === 0 && (
+            <div className="flex h-full flex-col items-center justify-center text-center animate-fade-in">
+              <div className="relative mb-5">
+                <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-brand-lavender/20">
+                  <MessageText1 size={36} variant="Bold" className="text-brand-lavender" />
+                </div>
+                <div className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-brand-peach shadow-[0_2px_8px_-2px_rgba(255,176,132,0.5)]">
+                  <MagicStar size={14} variant="Bold" className="text-ink" />
+                </div>
+              </div>
+              <p className="text-lg font-medium text-ink">Start a conversation</p>
+              <p className="mt-1.5 max-w-sm text-sm text-muted leading-relaxed">
+                Ask a question about your leads or try one of the suggestions above.
+              </p>
+            </div>
+          )}
 
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
+          {messages.map((msg, i) => (
             <div
-              className={`max-w-[75%] rounded-2xl px-4 py-3 ${
-                msg.role === 'user'
-                  ? 'bg-blue-600 text-white'
-                  : msg.error
-                    ? 'border border-red-500/40 bg-red-500/10 text-red-300'
-                    : 'border border-slate-700 bg-slate-800 text-slate-200'
-              }`}
+              key={i}
+              className={`animate-fade-in-up flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              {msg.role === 'assistant' && !msg.error ? (
-                <MarkdownMessage content={msg.content} />
-              ) : (
-                <p className="text-sm">{msg.content}</p>
+              {msg.role === 'assistant' && (
+                <div className="mr-3 mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-teal text-on-dark shadow-[0_2px_8px_-2px_rgba(26,58,58,0.3)]">
+                  <Cpu size={18} variant="Bold" />
+                </div>
               )}
+              <div
+                className={`max-w-[80%] rounded-2xl px-5 py-3.5 ${
+                  msg.role === 'user'
+                    ? 'bg-primary text-on-primary shadow-[0_2px_8px_-2px_rgba(10,10,10,0.2)]'
+                    : msg.error
+                      ? 'border border-error/25 bg-error/5 text-error'
+                      : 'border border-hairline bg-surface-soft/80 text-body shadow-[0_1px_3px_rgba(10,10,10,0.03)]'
+                }`}
+              >
+                {msg.role === 'assistant' && !msg.error ? (
+                  <MarkdownMessage content={msg.content} />
+                ) : (
+                  <p className="text-sm leading-relaxed">{msg.content}</p>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
 
-        {loading && (
-          <div className="flex justify-start">
-            <div className="flex items-center gap-2 rounded-2xl border border-slate-700 bg-slate-800 px-4 py-3 text-sm text-slate-400">
-              <span className="h-3 w-3 animate-spin rounded-full border-2 border-blue-400 border-t-transparent" />
-              Thinking…
+          {/* Typing indicator with bouncing dots */}
+          {loading && (
+            <div className="animate-fade-in flex justify-start">
+              <div className="mr-3 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-teal text-on-dark shadow-[0_2px_8px_-2px_rgba(26,58,58,0.3)]">
+                <Cpu size={18} variant="Bold" />
+              </div>
+              <div className="flex items-center gap-2 rounded-2xl border border-hairline bg-surface-soft/80 px-5 py-4 shadow-[0_1px_3px_rgba(10,10,10,0.03)]">
+                <div className="typing-dots">
+                  <span /><span /><span />
+                </div>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <div ref={bottomRef} />
-      </div>
+          <div ref={bottomRef} />
+        </div>
 
-      <form onSubmit={handleSubmit} className="mt-4 flex gap-2">
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask about your leads…"
-          disabled={loading}
-          className="flex-1 rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none disabled:opacity-50"
-        />
-        <button
-          type="submit"
-          disabled={loading || !input.trim()}
-          className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-medium text-white hover:bg-blue-500 disabled:opacity-50"
+        {/* Input area */}
+        <form
+          onSubmit={handleSubmit}
+          className="flex gap-3 border-t border-hairline bg-surface-soft/60 p-4"
         >
-          Send
-        </button>
-      </form>
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Ask about your leads…"
+            disabled={loading}
+            className="h-11 flex-1 rounded-xl border border-hairline bg-canvas px-4 text-sm text-ink placeholder:text-muted-soft transition-all duration-200 focus:border-brand-lavender focus:ring-2 focus:ring-brand-lavender/20 focus:outline-none disabled:opacity-50"
+          />
+          <Button
+            type="submit"
+            disabled={loading || !input.trim()}
+            icon={Send2}
+            className="shrink-0"
+          >
+            Send
+          </Button>
+        </form>
+      </div>
     </div>
   );
 }

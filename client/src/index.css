@@ -1,18 +1,420 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
+
+@theme {
+  /* Light Theme Palette (Airtable canvas default) */
+  --color-canvas: #ffffff;
+  --color-surface-soft: #f8fafc;
+  --color-surface-card: #f1f5f9;
+  --color-surface-strong: #e0e2e6;
+  --color-surface-dark: #181d26;
+  --color-surface-dark-elevated: #1d1f25;
+  --color-primary: #181d26;
+  --color-ink: #181d26;
+  --color-body-strong: #111827;
+  --color-body: #333840;
+  --color-muted: #41454d;
+  --color-muted-soft: #9297a0;
+  --color-hairline: #dddddd;
+  
+  --color-brand-pink: #aa2d00; /* coral */
+  --color-brand-teal: #0a2e0e; /* forest */
+  --color-brand-lavender: #b8a4ed;
+  --color-brand-peach: #fcab79;
+  --color-brand-ochre: #d9a441;
+  --color-brand-mint: #a8d8c4;
+  --color-brand-coral: #aa2d00;
+  --color-success: #006400;
+  --color-warning: #d9a441;
+  --color-error: #aa2d00;
+  --color-on-primary: #ffffff;
+  --color-on-dark: #ffffff;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 24px;
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Dark theme overrides */
+.dark {
+  --color-canvas: #0f1218;
+  --color-surface-soft: #181d26;
+  --color-surface-card: #1d232e;
+  --color-surface-strong: #272f3e;
+  --color-surface-dark: #0d1218;
+  --color-surface-dark-elevated: #0f1218;
+  --color-primary: #ffffff;
+  --color-ink: #ffffff;
+  --color-body-strong: #f8fafc;
+  --color-body: #e2e8f0;
+  --color-muted: #94a3b8;
+  --color-muted-soft: #64748b;
+  --color-hairline: #334155;
+  
+  --color-brand-pink: #fcab79; /* Soft peach */
+  --color-brand-teal: #a8d8c4; /* Mint/Soft green */
+  --color-brand-coral: #fcab79;
+  --color-success: #22c55e;
+  --color-warning: #eab308;
+  --color-error: #ef4444;
+  --color-on-primary: #0f1218;
+  --color-on-dark: #ffffff;
+}
+
+/* Smooth theme transitions across the entire DOM tree */
+*, *::before, *::after {
+  transition: background-color 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Base Reset ────────────────────────────────────────── */
 
 * {
   box-sizing: border-box;
 }
 
+::selection {
+  background: rgba(184, 164, 237, 0.35);
+  color: var(--color-ink);
+}
+
 body {
   margin: 0;
   min-height: 100vh;
-  background-color: #020617;
-  color: #f1f5f9;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--color-canvas);
+  color: var(--color-body);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #root {
   min-height: 100vh;
+}
+
+/* ─── Display Typography (Plain Black substitute) ───────── */
+
+.display-xl {
+  font-size: clamp(2.25rem, 5vw, 4.5rem);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--color-ink);
+}
+
+.display-lg {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  color: var(--color-ink);
+}
+
+.display-md {
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  color: var(--color-ink);
+}
+
+.display-sm {
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  color: var(--color-ink);
+}
+
+.caption-uppercase {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ─── Keyframe Animations ───────────────────────────────── */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulseRing {
+  0% { box-shadow: 0 0 0 0 rgba(164, 212, 197, 0.5); }
+  70% { box-shadow: 0 0 0 8px rgba(164, 212, 197, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(164, 212, 197, 0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes bounceDot {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes progressBar {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+/* ─── Animation Utility Classes ─────────────────────────── */
+
+.animate-fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-ring {
+  animation: pulseRing 2s ease-out infinite;
+}
+
+/* Staggered entrance delays */
+.delay-1 { animation-delay: 0.05s; }
+.delay-2 { animation-delay: 0.1s; }
+.delay-3 { animation-delay: 0.15s; }
+.delay-4 { animation-delay: 0.2s; }
+.delay-5 { animation-delay: 0.25s; }
+.delay-6 { animation-delay: 0.3s; }
+
+/* ─── Glassmorphism ─────────────────────────────────────── */
+
+.glass {
+  background: rgba(255, 250, 240, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(229, 229, 229, 0.5);
+}
+
+.glass-dark {
+  background: rgba(10, 26, 26, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ─── Decorative Patterns ───────────────────────────────── */
+
+.dot-pattern {
+  background-image: radial-gradient(circle, var(--color-hairline) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.gradient-accent-line {
+  height: 3px;
+  width: 48px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, var(--color-brand-lavender), var(--color-brand-peach), var(--color-brand-pink));
+}
+
+/* ─── Skeleton Loading ──────────────────────────────────── */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-soft) 25%,
+    var(--color-surface-card) 50%,
+    var(--color-surface-soft) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite ease-in-out;
+  border-radius: 8px;
+}
+
+/* ─── Bouncing dots (typing indicator) ──────────────────── */
+
+.typing-dots {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.typing-dots span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-muted);
+  animation: bounceDot 1.4s ease-in-out infinite;
+}
+
+.typing-dots span:nth-child(2) {
+  animation-delay: 0.16s;
+}
+
+.typing-dots span:nth-child(3) {
+  animation-delay: 0.32s;
+}
+
+/* ─── Card hover lift ───────────────────────────────────── */
+
+.hover-lift {
+  transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px -8px rgba(10, 10, 10, 0.1);
+}
+
+/* ─── Progress bar animation ────────────────────────────── */
+
+.progress-bar-animate {
+  animation: progressBar 6s linear forwards;
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-hairline);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted-soft);
+}
+
+/* ─── Focus visible ─────────────────────────────────────── */
+
+:focus-visible {
+  outline: 2px solid var(--color-brand-lavender);
+  outline-offset: 2px;
+}
+
+/* ─── Sidebar active indicator ──────────────────────────── */
+
+.nav-active-indicator {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 24px;
+  border-radius: 0 9999px 9999px 0;
+  background: linear-gradient(180deg, var(--color-brand-lavender), var(--color-brand-peach));
+  transition: all 0.2s ease;
 }

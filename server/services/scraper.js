@@ -199,7 +199,6 @@ const scrapeLeads = async ({ location, targetAudience, requiredLeads }) => {
   try {
     browser = await puppeteerExtra.launch({
       headless: "new",
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/brave",
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",

@@ -1,5 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
+  Add,
+  DocumentDownload,
+  Location,
+  People,
+  SearchNormal1,
+  Trash,
+  Eye,
+  Radar2,
+} from 'iconsax-reactjs';
+import {
   createCampaign,
   deleteCampaign,
   getCampaigns,
@@ -8,6 +18,11 @@ import {
 } from '../api';
 import LeadsModal from '../components/LeadsModal';
 import StatusBadge from '../components/StatusBadge';
+import PageHeader from '../components/ui/PageHeader';
+import Button from '../components/ui/Button';
+import Input from '../components/ui/Input';
+import Alert from '../components/ui/Alert';
+import { getBrandVariant } from '../lib/brandColors';
 
 const emptyForm = { name: '', location: '', targetAudience: '', requiredLeads: 50 };
 
@@ -58,7 +73,9 @@ export default function Campaigns() {
 
       setShowModal(false);
       setForm(emptyForm);
-      setScrapingMessage('Scraping leads in the background… polling for status every 5 seconds.');
+      setScrapingMessage(
+        'Scraping leads in the background — polling for status every 5 seconds.',
+      );
 
       await scrapeLeads(campaign._id);
       const result = await pollCampaignUntilDone(campaign._id);
@@ -90,168 +107,216 @@ export default function Campaigns() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-white">Campaigns</h2>
-          <p className="text-slate-400">Create and manage lead generation campaigns</p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setShowModal(true)}
-          disabled={submitting}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 disabled:opacity-50"
-        >
-          + New Campaign
-        </button>
-      </div>
+    <div className="space-y-10">
+      <PageHeader
+        eyebrow="Campaigns"
+        title="Create and manage lead campaigns"
+        description="Define your target audience, scrape leads automatically, and export results to Google Sheets."
+        action={
+          <Button icon={Add} onClick={() => setShowModal(true)} disabled={submitting}>
+            New Campaign
+          </Button>
+        }
+      />
 
       {error && (
-        <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+        <Alert type="error" dismissible onDismiss={() => setError('')}>
           {error}
-        </div>
+        </Alert>
       )}
 
       {scrapingMessage && (
-        <div className="flex items-center gap-3 rounded-lg border border-blue-500/40 bg-blue-500/10 px-4 py-3 text-sm text-blue-300">
-          <span className="h-4 w-4 animate-spin rounded-full border-2 border-blue-400 border-t-transparent" />
-          {scrapingMessage}
-        </div>
+        <Alert type="info">
+          <span className="inline-flex items-center gap-2">
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-brand-teal border-t-transparent" />
+            {scrapingMessage}
+          </span>
+        </Alert>
       )}
 
       {toast && (
-        <div className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
-          {toast.message}
-          {toast.sheetUrl && (
-            <a
-              href={toast.sheetUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="ml-2 font-medium text-blue-400 underline"
-            >
-              View in Google Sheets
-            </a>
-          )}
+        <div className="toast-enter relative overflow-hidden">
+          <Alert type="success" dismissible onDismiss={() => setToast(null)}>
+            {toast.message}
+            {toast.sheetUrl && (
+              <a
+                href={toast.sheetUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="ml-2 font-semibold text-ink underline underline-offset-2"
+              >
+                View in Google Sheets
+              </a>
+            )}
+          </Alert>
+          <div className="absolute bottom-0 left-0 h-0.5 bg-success/40 progress-bar-animate" />
         </div>
       )}
 
       {loading ? (
-        <p className="text-slate-400">Loading campaigns…</p>
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="skeleton h-56 rounded-2xl" />
+          ))}
+        </div>
       ) : campaigns.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-700 py-16 text-center">
-          <p className="text-slate-400">No campaigns yet. Create one to start scraping leads.</p>
+        <div className="relative overflow-hidden rounded-2xl border border-dashed border-hairline bg-surface-soft py-20 text-center">
+          <div className="absolute inset-0 dot-pattern opacity-20 pointer-events-none" />
+          <div className="relative">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-ochre/15 animate-float">
+              <SearchNormal1 size={32} variant="Bold" className="text-brand-ochre" />
+            </div>
+            <p className="text-lg font-medium text-ink">No campaigns yet</p>
+            <p className="mt-1 text-muted">Create one to start scraping leads.</p>
+            <Button icon={Add} className="mt-6" onClick={() => setShowModal(true)}>
+              Create Campaign
+            </Button>
+          </div>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {campaigns.map((campaign) => (
-            <div
-              key={campaign._id}
-              className="flex flex-col rounded-xl border border-slate-800 bg-slate-900 p-5"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <h3 className="font-semibold text-white">{campaign.name}</h3>
-                <StatusBadge status={campaign.status} />
-              </div>
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          {campaigns.map((campaign, index) => {
+            const variant = getBrandVariant(index);
+            const progress = campaign.requiredLeads
+              ? Math.min(((campaign.totalLeads || 0) / campaign.requiredLeads) * 100, 100)
+              : 0;
 
-              <div className="mt-3 space-y-1 text-sm text-slate-400">
-                <p>📍 {campaign.location}</p>
-                <p>🎯 {campaign.targetAudience}</p>
-                <p>👥 {campaign.totalLeads || 0} / {campaign.requiredLeads} leads</p>
-              </div>
+            return (
+              <article
+                key={campaign._id}
+                className={`animate-fade-in-up delay-${(index % 6) + 1} group flex flex-col overflow-hidden rounded-2xl ${variant.bg} ${variant.border} ${variant.accentBorder} ${variant.text} hover-lift shadow-[0_1px_3px_rgba(10,10,10,0.04)]`}
+              >
+                <div className="flex flex-1 flex-col p-6">
+                  <div className="flex items-start justify-between gap-3">
+                    <h3 className="text-base font-semibold leading-snug text-ink">{campaign.name}</h3>
+                    <StatusBadge status={campaign.status} />
+                  </div>
 
-              <div className="mt-4 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => setSelectedCampaign(campaign)}
-                  className="rounded-lg bg-slate-800 px-3 py-1.5 text-xs text-slate-200 hover:bg-slate-700"
-                >
-                  View Leads
-                </button>
-                {campaign.sheetUrl && (
-                  <a
-                    href={campaign.sheetUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="rounded-lg bg-slate-800 px-3 py-1.5 text-xs text-blue-400 hover:bg-slate-700"
-                  >
-                    View Sheet
-                  </a>
-                )}
-                <button
-                  type="button"
-                  onClick={() => handleDelete(campaign._id, campaign.name)}
-                  className="rounded-lg bg-red-500/10 px-3 py-1.5 text-xs text-red-400 hover:bg-red-500/20"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
+                  <ul className={`mt-4 space-y-2 text-sm ${variant.muted}`}>
+                    <li className="flex items-center gap-2.5">
+                      <div className={`flex h-6 w-6 items-center justify-center rounded-md ${variant.iconBg}`}>
+                        <Location size={13} variant="Bold" />
+                      </div>
+                      <span>{campaign.location}</span>
+                    </li>
+                    <li className="flex items-center gap-2.5">
+                      <div className={`flex h-6 w-6 items-center justify-center rounded-md ${variant.iconBg}`}>
+                        <SearchNormal1 size={13} variant="Bold" />
+                      </div>
+                      <span>{campaign.targetAudience}</span>
+                    </li>
+                    <li className="flex items-center gap-2.5">
+                      <div className={`flex h-6 w-6 items-center justify-center rounded-md ${variant.iconBg}`}>
+                        <People size={13} variant="Bold" />
+                      </div>
+                      <span className="font-medium text-ink">{campaign.totalLeads || 0}</span>
+                      <span className="text-muted-soft">/ {campaign.requiredLeads} leads</span>
+                    </li>
+                  </ul>
+
+                  {/* Progress bar */}
+                  <div className="mt-4">
+                    <div className={`h-1.5 w-full overflow-hidden rounded-full ${variant.progressBg}`}>
+                      <div
+                        className={`h-full rounded-full ${variant.progressFill} transition-all duration-700 ease-out`}
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="mt-5 flex flex-wrap gap-2 border-t border-hairline pt-5">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCampaign(campaign)}
+                      className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${variant.badge}`}
+                    >
+                      <Eye size={14} variant="Bold" />
+                      View Leads
+                    </button>
+                    {campaign.sheetUrl && (
+                      <a
+                        href={campaign.sheetUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${variant.badge}`}
+                      >
+                        <DocumentDownload size={14} variant="Bold" />
+                        View Sheet
+                      </a>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(campaign._id, campaign.name)}
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-error/8 px-3 py-1.5 text-xs font-semibold text-error transition-colors hover:bg-error/15"
+                    >
+                      <Trash size={14} variant="Bold" />
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
         </div>
       )}
 
+      {/* New Campaign Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-md rounded-xl border border-slate-700 bg-slate-900 p-6 shadow-2xl">
-            <h3 className="text-lg font-semibold text-white">New Campaign</h3>
-            <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-              <div>
-                <label className="mb-1 block text-sm text-slate-400">Campaign Name</label>
-                <input
-                  required
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
-                  placeholder="Delhi Restaurants"
-                />
+        <div className="modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-ink/40 backdrop-blur-sm p-4">
+          <div className="modal-content w-full max-w-md overflow-hidden rounded-2xl border border-hairline bg-canvas shadow-2xl">
+            <div className="border-b border-hairline bg-surface-soft px-8 pt-7 pb-5">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-on-primary mb-3">
+                <Radar2 size={20} variant="Bold" />
               </div>
-              <div>
-                <label className="mb-1 block text-sm text-slate-400">Location</label>
-                <input
-                  required
-                  value={form.location}
-                  onChange={(e) => setForm({ ...form, location: e.target.value })}
-                  className="w-full rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
-                  placeholder="Delhi"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-sm text-slate-400">Target Audience</label>
-                <input
-                  required
-                  value={form.targetAudience}
-                  onChange={(e) => setForm({ ...form, targetAudience: e.target.value })}
-                  className="w-full rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
-                  placeholder="Restaurants"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-sm text-slate-400">Required Leads (10–1000)</label>
-                <input
-                  required
-                  type="number"
-                  min={10}
-                  max={1000}
-                  value={form.requiredLeads}
-                  onChange={(e) => setForm({ ...form, requiredLeads: e.target.value })}
-                  className="w-full rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
-                />
-              </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <button
+              <p className="caption-uppercase text-muted">New campaign</p>
+              <h3 className="mt-1 text-xl font-semibold tracking-tight text-ink">
+                Launch a lead scrape
+              </h3>
+            </div>
+
+            <form onSubmit={handleSubmit} className="px-8 pb-8 pt-6 space-y-4">
+              <Input
+                label="Campaign Name"
+                required
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="Delhi Restaurants"
+              />
+              <Input
+                label="Location"
+                required
+                value={form.location}
+                onChange={(e) => setForm({ ...form, location: e.target.value })}
+                placeholder="Delhi"
+              />
+              <Input
+                label="Target Audience"
+                required
+                value={form.targetAudience}
+                onChange={(e) => setForm({ ...form, targetAudience: e.target.value })}
+                placeholder="Restaurants"
+              />
+              <Input
+                label="Required Leads (10–1000)"
+                required
+                type="number"
+                min={10}
+                max={1000}
+                value={form.requiredLeads}
+                onChange={(e) => setForm({ ...form, requiredLeads: e.target.value })}
+              />
+              <div className="flex justify-end gap-2 pt-4">
+                <Button
+                  variant="ghost"
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="rounded-lg px-4 py-2 text-sm text-slate-400 hover:text-white"
                 >
                   Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 disabled:opacity-50"
-                >
-                  Create &amp; Scrape
-                </button>
+                </Button>
+                <Button type="submit" disabled={submitting}>
+                  {submitting ? 'Creating…' : 'Create & Scrape'}
+                </Button>
               </div>
             </form>
           </div>

@@ -1,5 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
+import {
+  ArrowLeft2,
+  ArrowRight2,
+  CloseCircle,
+  DocumentDownload,
+  SearchNormal1,
+  People,
+} from 'iconsax-reactjs';
 import { getLeads } from '../api';
+import Button from './ui/Button';
 
 export default function LeadsModal({ campaign, onClose }) {
   const [leads, setLeads] = useState([]);
@@ -45,113 +54,188 @@ export default function LeadsModal({ campaign, onClose }) {
 
   if (!campaign) return null;
 
+  const progress = campaign.requiredLeads
+    ? Math.min(((campaign.totalLeads || 0) / campaign.requiredLeads) * 100, 100)
+    : 0;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="flex max-h-[90vh] w-full max-w-5xl flex-col rounded-xl border border-slate-700 bg-slate-900 shadow-2xl">
-        <div className="flex items-center justify-between border-b border-slate-700 px-6 py-4">
-          <div>
-            <h2 className="text-lg font-semibold text-white">{campaign.name}</h2>
-            <p className="text-sm text-slate-400">{pagination.total} leads</p>
-          </div>
-          <div className="flex items-center gap-3">
-            {campaign.sheetUrl && (
-              <a
-                href={campaign.sheetUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-500"
+    <div className="modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-ink/40 backdrop-blur-sm p-4">
+      <div className="modal-content flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-hairline bg-canvas shadow-2xl">
+        {/* Header with decorative gradient */}
+        <div className="relative border-b border-hairline bg-gradient-to-r from-brand-lavender/10 via-surface-soft to-brand-peach/10 px-6 py-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="caption-uppercase text-muted">Campaign leads</p>
+              <h2 className="text-xl font-semibold tracking-tight text-ink">{campaign.name}</h2>
+              <div className="mt-2 flex items-center gap-4">
+                <div className="flex items-center gap-1.5 text-sm text-muted">
+                  <People size={14} variant="Bold" />
+                  <span className="font-medium text-ink">{pagination.total}</span> leads
+                </div>
+                {/* Progress indicator */}
+                <div className="flex items-center gap-2">
+                  <div className="h-1.5 w-20 overflow-hidden rounded-full bg-hairline">
+                    <div
+                      className="h-full rounded-full bg-brand-lavender transition-all duration-500"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                  <span className="text-xs text-muted">{Math.round(progress)}%</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {campaign.sheetUrl && (
+                <a href={campaign.sheetUrl} target="_blank" rel="noreferrer">
+                  <Button variant="secondary" size="sm" icon={DocumentDownload}>
+                    Export
+                  </Button>
+                </a>
+              )}
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-xl p-2 text-muted transition-colors hover:bg-surface-card hover:text-ink"
+                aria-label="Close"
               >
-                Export to Sheets
-              </a>
-            )}
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-lg px-3 py-1.5 text-sm text-slate-400 hover:bg-slate-800 hover:text-white"
-            >
-              Close
-            </button>
+                <CloseCircle size={22} />
+              </button>
+            </div>
           </div>
         </div>
 
-        <div className="border-b border-slate-700 px-6 py-3">
+        {/* Search bar */}
+        <div className="border-b border-hairline px-6 py-4 bg-surface-soft/30">
           <form onSubmit={handleSearch} className="flex gap-2">
-            <input
-              type="text"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Search by name or email…"
-              className="flex-1 rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
-            />
-            <button
-              type="submit"
-              className="rounded-lg bg-slate-700 px-4 py-2 text-sm text-white hover:bg-slate-600"
-            >
+            <div className="relative flex-1">
+              <SearchNormal1
+                size={18}
+                className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted"
+              />
+              <input
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="Search by name or email…"
+                className="h-11 w-full rounded-xl border border-hairline bg-canvas pl-10 pr-4 text-sm text-ink placeholder:text-muted-soft transition-all duration-200 focus:border-brand-lavender focus:ring-2 focus:ring-brand-lavender/20 focus:outline-none"
+              />
+            </div>
+            <Button type="submit" variant="secondary" size="md">
               Search
-            </button>
+            </Button>
           </form>
         </div>
 
+        {/* Table content */}
         <div className="flex-1 overflow-auto px-6 py-4">
           {loading ? (
-            <p className="text-center text-slate-400">Loading leads…</p>
+            <div className="space-y-3 py-8">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="skeleton h-12 rounded-lg" />
+              ))}
+            </div>
           ) : error ? (
-            <p className="text-center text-red-400">{error}</p>
+            <p className="py-16 text-center text-error">{error}</p>
           ) : leads.length === 0 ? (
-            <p className="text-center text-slate-400">No leads found.</p>
+            <div className="py-16 text-center">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-surface-card animate-float">
+                <SearchNormal1 size={24} variant="Bold" className="text-muted" />
+              </div>
+              <p className="text-muted">No leads found.</p>
+            </div>
           ) : (
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-slate-700 text-slate-400">
-                  <th className="pb-2 pr-4 font-medium">Name</th>
-                  <th className="pb-2 pr-4 font-medium">Email</th>
-                  <th className="pb-2 pr-4 font-medium">Phone</th>
-                  <th className="pb-2 pr-4 font-medium">Website</th>
-                  <th className="pb-2 font-medium">Address</th>
-                </tr>
-              </thead>
-              <tbody>
-                {leads.map((lead) => (
-                  <tr key={lead._id} className="border-b border-slate-800 text-slate-300">
-                    <td className="py-2.5 pr-4">{lead.businessName || '—'}</td>
-                    <td className="py-2.5 pr-4">{lead.email || '—'}</td>
-                    <td className="py-2.5 pr-4">{lead.phone || '—'}</td>
-                    <td className="py-2.5 pr-4">
-                      {lead.website ? (
-                        <a href={lead.website} target="_blank" rel="noreferrer" className="text-blue-400 hover:underline">
-                          Link
-                        </a>
-                      ) : '—'}
-                    </td>
-                    <td className="py-2.5">{lead.address || '—'}</td>
+            <div className="table-row-hover">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-hairline text-muted">
+                    <th className="pb-3 pr-4 font-semibold">Name</th>
+                    <th className="pb-3 pr-4 font-semibold">Email</th>
+                    <th className="pb-3 pr-4 font-semibold">Phone</th>
+                    <th className="pb-3 pr-4 font-semibold">Website</th>
+                    <th className="pb-3 font-semibold">Address</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {leads.map((lead) => (
+                    <tr key={lead._id} className="border-b border-hairline/50 text-body transition-colors">
+                      <td className="py-3.5 pr-4 font-medium text-ink">
+                        {lead.businessName || '—'}
+                      </td>
+                      <td className="py-3.5 pr-4">
+                        {lead.email ? (
+                          <span className="rounded-lg bg-surface-card px-2 py-0.5 text-xs font-medium">
+                            {lead.email}
+                          </span>
+                        ) : '—'}
+                      </td>
+                      <td className="py-3.5 pr-4">{lead.phone || '—'}</td>
+                      <td className="py-3.5 pr-4">
+                        {lead.website ? (
+                          <a
+                            href={lead.website}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 rounded-lg bg-brand-teal/8 px-2.5 py-1 text-xs font-semibold text-brand-teal transition-colors hover:bg-brand-teal/15"
+                          >
+                            Visit
+                          </a>
+                        ) : (
+                          '—'
+                        )}
+                      </td>
+                      <td className="py-3.5 max-w-[200px] truncate">{lead.address || '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
 
+        {/* Pagination */}
         {pagination.pages > 1 && (
-          <div className="flex items-center justify-between border-t border-slate-700 px-6 py-3">
-            <button
-              type="button"
+          <div className="flex items-center justify-between border-t border-hairline bg-surface-soft/50 px-6 py-4">
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={ArrowLeft2}
               disabled={page <= 1}
               onClick={() => setPage((p) => p - 1)}
-              className="rounded-lg px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800 disabled:opacity-40"
             >
               Previous
-            </button>
-            <span className="text-sm text-slate-400">
-              Page {page} of {pagination.pages}
-            </span>
-            <button
-              type="button"
+            </Button>
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.min(pagination.pages, 5) }, (_, i) => {
+                const pageNum = i + 1;
+                return (
+                  <button
+                    key={pageNum}
+                    type="button"
+                    onClick={() => setPage(pageNum)}
+                    className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-semibold transition-colors ${
+                      page === pageNum
+                        ? 'bg-primary text-on-primary'
+                        : 'text-muted hover:bg-surface-card hover:text-ink'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+              {pagination.pages > 5 && (
+                <span className="px-1 text-xs text-muted">…{pagination.pages}</span>
+              )}
+            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={ArrowRight2}
+              iconPosition="right"
               disabled={page >= pagination.pages}
               onClick={() => setPage((p) => p + 1)}
-              className="rounded-lg px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800 disabled:opacity-40"
             >
               Next
-            </button>
+            </Button>
           </div>
         )}
       </div>
