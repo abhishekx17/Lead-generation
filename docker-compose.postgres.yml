@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: leadgen_postgres
+    environment:
+      POSTGRES_USER: leadgen
+      POSTGRES_PASSWORD: leadgen_dev_password
+      POSTGRES_DB: leadgen
+    ports:
+      - '5432:5432'
+    volumes:
+      - leadgen_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U leadgen']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  leadgen_postgres_data:
+
+# Local DATABASE_URL: postgres://leadgen:leadgen_dev_password@localhost:5432/leadgen

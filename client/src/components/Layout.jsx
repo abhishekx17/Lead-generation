@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   DashboardCircleIcon,
   Menu01Icon,
@@ -11,8 +11,11 @@ import {
 } from 'hugeicons-react';
 import { Menu } from 'lucide-react';
 import { gsap } from 'gsap';
+import OrgSwitcher from './OrgSwitcher';
+import { useAuth } from '../context/AuthContext';
+import { signOut } from '../lib/auth-client';
 
-const links = [
+const coreLinks = [
   { to: '/', label: 'Dashboard', icon: DashboardCircleIcon, end: true },
   { to: '/campaigns', label: 'Campaigns', icon: Radar01Icon },
   { to: '/chat', label: 'AI Chat', icon: BubbleChatIcon },
@@ -22,9 +25,13 @@ const pageTitles = {
   '/': 'Dashboard',
   '/campaigns': 'Campaigns',
   '/chat': 'AI Chat',
+  '/admin': 'Admin',
 };
 
-function NavItems({ collapsed = false, onNavigate }) {
+function NavItems({ collapsed = false, onNavigate, isSuperAdmin }) {
+  const links = isSuperAdmin
+    ? [...coreLinks, { to: '/admin', label: 'Admin', icon: DashboardCircleIcon }]
+    : coreLinks;
   return links.map((link) => {
     const Icon = link.icon;
     return (
@@ -68,6 +75,8 @@ function NavItems({ collapsed = false, onNavigate }) {
 export default function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { user, isSuperAdmin } = useAuth();
+  const navigate = useNavigate();
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('theme');
@@ -142,8 +151,15 @@ export default function Layout() {
           {sidebarOpen && (
             <p className="caption-uppercase mb-2 px-6 text-muted-soft">Menu</p>
           )}
-          <NavItems collapsed={!sidebarOpen} />
+          <NavItems collapsed={!sidebarOpen} isSuperAdmin={isSuperAdmin} />
         </nav>
+
+        {/* Org switcher in sidebar bottom */}
+        {sidebarOpen && (
+          <div className="border-t border-hairline px-3 py-3">
+            <OrgSwitcher />
+          </div>
+        )}
       </aside>
 
       {/* ── Mobile drawer ────────────────────────────────────────── */}
@@ -172,8 +188,11 @@ export default function Layout() {
               </button>
             </div>
             <nav className="flex flex-col gap-1 py-4 pr-4">
-              <NavItems onNavigate={() => setMobileOpen(false)} />
+              <NavItems onNavigate={() => setMobileOpen(false)} isSuperAdmin={isSuperAdmin} />
             </nav>
+            <div className="border-t border-hairline px-4 py-3">
+              <OrgSwitcher />
+            </div>
           </aside>
         </div>
       )}
@@ -229,6 +248,24 @@ export default function Layout() {
                 : <Sun01Icon size={18} className="text-brand-ochre" />
               }
             </button>
+
+            {/* User avatar + sign out */}
+            {user && (
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-full bg-brand-teal flex items-center justify-center text-xs font-semibold text-white">
+                  {user.name?.slice(0, 2).toUpperCase() ?? user.email?.slice(0, 2).toUpperCase()}
+                </div>
+                <button
+                  id="header-signout-btn"
+                  type="button"
+                  onClick={async () => { await signOut(); navigate('/login'); }}
+                  className="text-xs text-muted hover:text-ink transition-colors cursor-pointer"
+                  title="Sign out"
+                >
+                  Sign out
+                </button>
+              </div>
+            )}
           </div>
         </header>
 
