@@ -39,6 +39,7 @@ export default function Campaigns() {
   const [scrapingMessage, setScrapingMessage] = useState('');
   const [toast, setToast] = useState(null);
   const [selectedCampaign, setSelectedCampaign] = useState(null);
+  const [confirmAction, setConfirmAction] = useState(null);
 
   const loadCampaigns = useCallback(async () => {
     try {
@@ -61,6 +62,7 @@ export default function Campaigns() {
     const handleEscape = (e) => {
       if (e.key === 'Escape') {
         setShowModal(false);
+        setConfirmAction(null);
       }
     };
     window.addEventListener('keydown', handleEscape);
@@ -122,15 +124,20 @@ export default function Campaigns() {
     }
   };
 
-  const handleDelete = async (id, name) => {
-    if (!window.confirm(`Delete campaign "${name}" and all its leads?`)) return;
-
-    try {
-      await deleteCampaign(id);
-      await loadCampaigns();
-    } catch (err) {
-      setError(err.message);
-    }
+  const handleDelete = (id, name) => {
+    setConfirmAction({
+      title: 'Delete campaign',
+      message: `Delete campaign "${name}" and all its leads?`,
+      confirmLabel: 'Delete',
+      onConfirm: async () => {
+        try {
+          await deleteCampaign(id);
+          await loadCampaigns();
+        } catch (err) {
+          setError(err.message);
+        }
+      },
+    });
   };
 
   return (
@@ -294,7 +301,18 @@ export default function Campaigns() {
       {showModal &&
         createPortal(
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-ink/40 backdrop-blur-sm p-4">
-            <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-hairline bg-canvas shadow-2xl">
+            <button
+              type="button"
+              aria-label="Close"
+              className="absolute inset-0 cursor-default"
+              onClick={() => setShowModal(false)}
+            />
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-label="New campaign"
+              className="relative w-full max-w-md overflow-hidden rounded-2xl border border-hairline-strong bg-canvas"
+            >
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
@@ -369,6 +387,50 @@ export default function Campaigns() {
                   </Button>
                 </div>
               </form>
+            </div>
+          </div>,
+          document.body
+        )
+      }
+
+      {/* Confirm Dialog */}
+      {confirmAction &&
+        createPortal(
+          <div className="fixed inset-0 z-[110] flex items-center justify-center bg-ink/40 backdrop-blur-sm p-4">
+            <button
+              type="button"
+              aria-label="Close"
+              className="absolute inset-0 cursor-default"
+              onClick={() => setConfirmAction(null)}
+            />
+            <div
+              role="alertdialog"
+              aria-modal="true"
+              aria-label={confirmAction.title}
+              className="relative w-full max-w-sm rounded-2xl border border-hairline-strong bg-canvas p-6"
+            >
+              <h3 className="text-lg font-semibold text-ink">{confirmAction.title}</h3>
+              <p className="mt-2 text-sm text-muted">{confirmAction.message}</p>
+              <div className="mt-6 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setConfirmAction(null)}
+                  className="rounded-lg border border-hairline bg-canvas px-4 py-2 text-sm font-semibold text-ink transition-colors hover:bg-surface-soft cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const { onConfirm } = confirmAction;
+                    setConfirmAction(null);
+                    onConfirm();
+                  }}
+                  className="rounded-lg bg-error px-4 py-2 text-sm font-semibold text-white transition-colors hover:opacity-90 cursor-pointer"
+                >
+                  {confirmAction.confirmLabel}
+                </button>
+              </div>
             </div>
           </div>,
           document.body

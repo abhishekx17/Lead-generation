@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useSearchParams } from 'react-router-dom';
 import {
   Mail01Icon,
@@ -22,6 +23,7 @@ export default function EmailAccounts() {
   const [error, setError] = useState('');
   const [toast, setToast] = useState(null);
   const [selectedAccount, setSelectedAccount] = useState(null);
+  const [confirmAction, setConfirmAction] = useState(null);
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -72,25 +74,44 @@ export default function EmailAccounts() {
     }
   }, [loading, accounts]);
 
+  // Auto-dismiss toast after 5s
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 5000);
+    return () => clearTimeout(timer);
+  }, [toast]);
+
+  // Escape closes the confirm dialog
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') setConfirmAction(null);
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, []);
+
   const handleConnect = () => {
     window.location.href = `${API_BASE}/api/auth/google/connect`;
   };
 
-  const handleDisconnect = async (id, email) => {
-    if (!window.confirm(`Are you sure you want to disconnect Gmail account ${email}? This will revoke tokens.`)) {
-      return;
-    }
-
-    try {
-      await disconnectEmailAccount(id);
-      setToast({
-        type: 'success',
-        message: `Disconnected ${email} successfully.`,
-      });
-      loadAccounts();
-    } catch (err) {
-      setError(err.message);
-    }
+  const handleDisconnect = (id, email) => {
+    setConfirmAction({
+      title: 'Disconnect Gmail account',
+      message: `Are you sure you want to disconnect Gmail account ${email}? This will revoke tokens.`,
+      confirmLabel: 'Disconnect',
+      onConfirm: async () => {
+        try {
+          await disconnectEmailAccount(id);
+          setToast({
+            type: 'success',
+            message: `Disconnected ${email} successfully.`,
+          });
+          loadAccounts();
+        } catch (err) {
+          setError(err.message);
+        }
+      },
+    });
   };
 
   const mapStatus = (status) => {
@@ -229,6 +250,50 @@ export default function EmailAccounts() {
           })}
         </div>
       )}
+
+      {/* Confirm Dialog */}
+      {confirmAction &&
+        createPortal(
+          <div className="fixed inset-0 z-[110] flex items-center justify-center bg-ink/40 backdrop-blur-sm p-4">
+            <button
+              type="button"
+              aria-label="Close"
+              className="absolute inset-0 cursor-default"
+              onClick={() => setConfirmAction(null)}
+            />
+            <div
+              role="alertdialog"
+              aria-modal="true"
+              aria-label={confirmAction.title}
+              className="relative w-full max-w-sm rounded-2xl border border-hairline-strong bg-canvas p-6"
+            >
+              <h3 className="text-lg font-semibold text-ink">{confirmAction.title}</h3>
+              <p className="mt-2 text-sm text-muted">{confirmAction.message}</p>
+              <div className="mt-6 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setConfirmAction(null)}
+                  className="rounded-lg border border-hairline bg-canvas px-4 py-2 text-sm font-semibold text-ink transition-colors hover:bg-surface-soft cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const { onConfirm } = confirmAction;
+                    setConfirmAction(null);
+                    onConfirm();
+                  }}
+                  className="rounded-lg bg-error px-4 py-2 text-sm font-semibold text-white transition-colors hover:opacity-90 cursor-pointer"
+                >
+                  {confirmAction.confirmLabel}
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )
+      }
 
       {/* Logs Modal */}
       {selectedAccount && (

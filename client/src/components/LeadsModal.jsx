@@ -131,7 +131,7 @@ export default function LeadsModal({ campaign, onClose }) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-ink/40 backdrop-blur-sm p-4">
-      <div className="flex h-[80vh] min-h-[500px] max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-hairline bg-canvas shadow-2xl">
+      <div className="flex h-[80vh] min-h-[500px] max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-hairline-strong bg-canvas">
         {/* Header */}
         <div className="relative border-b border-hairline bg-surface-soft px-6 py-5">
           <div className="flex items-center justify-between">

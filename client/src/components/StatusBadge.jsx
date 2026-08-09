@@ -6,24 +6,24 @@ import {
 } from 'hugeicons-react';
 
 const config = {
-  // Default: renders on canvas/cream/dark surfaces
+  // Default: renders on canvas/cream/dark surfaces — tokens adapt in .dark automatically
   default: {
     pending: {
       icon: Clock01Icon,
-      className: 'bg-[#f0ede6] text-[#6a6a6a] border-[#e5e5e5] dark:bg-[#2a2a28] dark:text-[#8a8a88] dark:border-[#3a3a38]',
+      className: 'bg-surface-strong text-muted border-hairline',
     },
     running: {
       icon: Refresh01Icon,
-      className: 'bg-[#e6f7f3] text-[#0f6e56] border-[#a4d4c5] dark:bg-[#0f3028] dark:text-[#4ad4b0] dark:border-[#1a4a38]',
+      className: 'bg-success/10 text-success border-success/30',
       spin: true,
     },
     completed: {
       icon: CheckmarkCircle01Icon,
-      className: 'bg-[#dcfce7] text-[#15803d] border-[#86efac] dark:bg-[#052e16] dark:text-[#4ade80] dark:border-[#166534]',
+      className: 'bg-success/15 text-success border-success/30',
     },
     failed: {
       icon: CancelCircleIcon,
-      className: 'bg-[#fee2e2] text-[#b91c1c] border-[#fca5a5] dark:bg-[#2d0a0a] dark:text-[#f87171] dark:border-[#7f1d1d]',
+      className: 'bg-error/10 text-error border-error/30',
     },
   },
   // onColor: renders on saturated brand card backgrounds (pink, teal, lavender, peach, ochre)

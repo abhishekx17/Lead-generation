@@ -64,7 +64,7 @@ function NavItems({ collapsed = false, onNavigate, isSuperAdmin }) {
             {!collapsed && <span className="truncate">{link.label}</span>}
             {/* Tooltip when collapsed */}
             {collapsed && (
-              <span className="pointer-events-none absolute left-full ml-3 z-50 whitespace-nowrap rounded-lg border border-hairline bg-canvas px-2.5 py-1.5 text-xs font-medium text-ink shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+              <span className="pointer-events-none absolute left-full ml-3 z-50 whitespace-nowrap rounded-lg border border-hairline-strong bg-canvas px-2.5 py-1.5 text-xs font-medium text-ink opacity-0 group-hover:opacity-100 transition-opacity duration-150">
                 {link.label}
               </span>
             )}
@@ -174,7 +174,7 @@ export default function Layout() {
             className="absolute inset-0 bg-ink/30 backdrop-blur-sm"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="relative flex h-full w-64 flex-col bg-canvas border-r border-hairline shadow-2xl">
+          <aside className="relative flex h-full w-64 flex-col bg-canvas border-r border-hairline-strong">
             <div className="flex h-16 items-center justify-between border-b border-hairline px-5">
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-teal text-on-dark">

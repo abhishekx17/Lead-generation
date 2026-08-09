@@ -36,7 +36,7 @@ export default function EmailLogsModal({ account, onClose }) {
   return createPortal(
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-ink/40 backdrop-blur-sm p-4">
       <button type="button" aria-label="Close" className="absolute inset-0 cursor-default" onClick={onClose} />
-      <div role="dialog" aria-modal="true" aria-label={`Outreach logs for ${account.email}`} className="relative w-full max-w-4xl overflow-hidden rounded-2xl border border-hairline bg-canvas shadow-2xl flex flex-col max-h-[85vh]">
+      <div role="dialog" aria-modal="true" aria-label={`Outreach logs for ${account.email}`} className="relative w-full max-w-4xl overflow-hidden rounded-2xl border border-hairline-strong bg-canvas flex flex-col max-h-[85vh]">
         
         {/* Close Button */}
         <button
