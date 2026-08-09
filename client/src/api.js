@@ -75,3 +75,18 @@ export const sendChatMessage = (question, campaignId) =>
     method: 'POST',
     body: JSON.stringify({ question, campaignId: campaignId || undefined }),
   });
+
+export const getEmailAccounts = () =>
+  apiFetch('/api/email-accounts');
+
+export const disconnectEmailAccount = (id) =>
+  apiFetch(`/api/email-accounts/${id}`, { method: 'DELETE' });
+
+export const getEmailAccountLogs = (id) =>
+  apiFetch(`/api/email-accounts/${id}/logs`);
+
+export const sendOutreachCampaign = (campaignId, body) =>
+  apiFetch(`/api/email-accounts/campaigns/${campaignId}/outreach/send`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });

@@ -8,6 +8,7 @@ import {
   Cancel01Icon,
   Sun01Icon,
   Moon01Icon,
+  Mail01Icon,
 } from 'hugeicons-react';
 import { Menu } from 'lucide-react';
 import { gsap } from 'gsap';
@@ -19,6 +20,7 @@ const coreLinks = [
   { to: '/', label: 'Dashboard', icon: DashboardCircleIcon, end: true },
   { to: '/campaigns', label: 'Campaigns', icon: Radar01Icon },
   { to: '/chat', label: 'AI Chat', icon: BubbleChatIcon },
+  { to: '/email-accounts', label: 'Email Accounts', icon: Mail01Icon },
 ];
 
 const pageTitles = {
@@ -26,6 +28,7 @@ const pageTitles = {
   '/campaigns': 'Campaigns',
   '/chat': 'AI Chat',
   '/admin': 'Admin',
+  '/email-accounts': 'Email Accounts',
 };
 
 function NavItems({ collapsed = false, onNavigate, isSuperAdmin }) {

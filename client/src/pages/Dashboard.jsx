@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight01Icon,
-  DashboardCircleIcon,
   UserGroupIcon,
   Radar01Icon,
   ChartIncreaseIcon,
@@ -43,6 +42,7 @@ function AnimatedNumber({ value }) {
   const [display, setDisplay] = useState(0);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (value === 0) { setDisplay(0); return; }
     const duration = 600;
     const steps = 30;

@@ -8,6 +8,7 @@ import Chat from './pages/Chat';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Admin from './pages/Admin';
+import EmailAccounts from './pages/EmailAccounts';
 
 export default function App() {
   return (
@@ -29,6 +30,7 @@ export default function App() {
             <Route index element={<Dashboard />} />
             <Route path="campaigns" element={<Campaigns />} />
             <Route path="chat" element={<Chat />} />
+            <Route path="email-accounts" element={<EmailAccounts />} />
 
             {/* Super admin only */}
             <Route

@@ -45,3 +45,12 @@ coverage/
 
 # Misc
 *.pem
+
+# Environment variables
+.env
+*.env
+.env.*
+.env.production
+.env.development
+.env.local
+
