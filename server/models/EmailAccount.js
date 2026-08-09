@@ -67,4 +67,4 @@ const emailAccountSchema = new mongoose.Schema(
 // Prevent duplicate connections per organization
 emailAccountSchema.index({ organizationId: 1, email: 1 }, { unique: true });
 
-module.exports = mongoose.model('EmailAccount', emailAccountSchema);
+module.exports = mongoose.models.EmailAccount || mongoose.model('EmailAccount', emailAccountSchema);

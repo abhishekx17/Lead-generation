@@ -1,40 +1,5 @@
-/* ─── Page transition wrapper ───────────────────────────── */
-
-.page-enter {
-  animation: fadeInUp 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
-}
-
-/* ─── Table enhancements ────────────────────────────────── */
-
-.table-row-hover tr {
-  transition: background-color 0.15s ease;
-}
-
-.table-row-hover tbody tr:hover {
-  background-color: var(--color-surface-soft);
-}
-
-/* ─── Modal backdrop ────────────────────────────────────── */
-
-.modal-backdrop {
-  animation: fadeIn 0.2s ease both;
-}
-
-.modal-content {
-  animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
 /* ─── Toast slide-in ────────────────────────────────────── */
 
 .toast-enter {
   animation: slideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-/* ─── Gradient text ─────────────────────────────────────── */
-
-.gradient-text {
-  background: linear-gradient(135deg, var(--color-brand-lavender), var(--color-brand-pink));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }

@@ -16,7 +16,7 @@ export default function Input({ label, icon: Icon, className = '', ...props }) {
         <input
           className={`h-11 w-full rounded-xl border border-hairline bg-canvas px-4 ${
             Icon ? 'pl-10' : ''
-          } text-sm text-ink placeholder:text-muted-soft transition-all duration-200 focus:border-ink focus:outline-none disabled:opacity-50 ${className}`}
+          } text-sm text-ink placeholder:text-muted-soft transition-all duration-200 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-50 ${className}`}
           {...props}
         />
       </div>
@@ -33,7 +33,7 @@ export function Select({ label, className = '', children, ...props }) {
         </label>
       )}
       <select
-        className={`h-11 rounded-xl border border-hairline bg-canvas px-4 pr-8 text-sm text-ink transition-all duration-200 focus:border-ink focus:outline-none disabled:opacity-50 cursor-pointer ${className}`}
+        className={`h-11 rounded-xl border border-hairline bg-canvas px-4 pr-8 text-sm text-ink transition-all duration-200 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-50 cursor-pointer ${className}`}
         {...props}
       >
         {children}
@@ -51,7 +51,7 @@ export function Textarea({ label, className = '', ...props }) {
         </label>
       )}
       <textarea
-        className={`w-full rounded-xl border border-hairline bg-canvas px-4 py-3 text-sm text-ink placeholder:text-muted-soft transition-all duration-200 focus:border-ink focus:outline-none disabled:opacity-50 resize-none ${className}`}
+        className={`w-full rounded-xl border border-hairline bg-canvas px-4 py-3 text-sm text-ink placeholder:text-muted-soft transition-all duration-200 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-50 resize-none ${className}`}
         {...props}
       />
     </div>

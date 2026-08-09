@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { auth } from './auth';
 import { db } from '../db';
-import { users } from '../db/schema';
+import { users, members } from '../db/schema';
 import { eq } from 'drizzle-orm';
 
 // Extend Express Request to carry auth context
@@ -57,15 +57,28 @@ export const authMiddleware = async (
       .where(eq(users.id, session.user.id))
       .limit(1);
 
-    const activeOrgId =
+    let activeOrgId =
       (session.session as any).activeOrganizationId ??
-      req.headers['x-organization-id'] as string ??
+      (req.headers['x-organization-id'] as string) ??
       '';
+    let role: 'owner' | 'admin' | 'member' = 'member';
+
+    // Fall back to (and read the role from) the user's own membership —
+    // fresh sessions have no activeOrganizationId until the client calls setActive.
+    const [membership] = await db
+      .select({ organizationId: members.organizationId, role: members.role })
+      .from(members)
+      .where(eq(members.userId, session.user.id))
+      .limit(1);
+    if (!activeOrgId && membership) activeOrgId = membership.organizationId;
+    if (membership && membership.organizationId === activeOrgId) {
+      role = membership.role as typeof role;
+    }
 
     req.ctx = {
       userId: session.user.id,
       organizationId: activeOrgId,
-      role: ((session.session as any).role as 'owner' | 'admin' | 'member') ?? 'member',
+      role,
       isSuperAdmin: dbUser?.isSuperAdmin ?? false,
       sessionId: session.session.id,
     };

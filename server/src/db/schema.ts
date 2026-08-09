@@ -22,6 +22,11 @@ export const users = pgTable('users', {
   isSuperAdmin: boolean('is_super_admin').default(false).notNull(),
   emailVerified: boolean('email_verified').default(false).notNull(),
   image: text('image'),
+  // Required by better-auth admin plugin
+  role: text('role'),
+  banned: boolean('banned').default(false),
+  banReason: text('ban_reason'),
+  banExpires: timestamp('ban_expires'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
@@ -37,6 +42,8 @@ export const sessions = pgTable('sessions', {
   ipAddress: text('ip_address'),
   userAgent: text('user_agent'),
   activeOrganizationId: text('active_organization_id'),
+  // Required by better-auth admin plugin
+  impersonatedBy: text('impersonated_by'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

@@ -113,8 +113,8 @@ export default function Chat() {
                 <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-brand-lavender/15 text-brand-lavender">
                   <Message size={36} variant="Bulk" color="var(--color-brand-lavender)" />
                 </div>
-                <div className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-brand-peach text-[#0a0a0a]">
-                  <MagicStar size={14} variant="Bulk" color="#0a0a0a" />
+                <div className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-brand-peach text-ink">
+                  <MagicStar size={14} variant="Bulk" color="var(--color-ink)" />
                 </div>
               </div>
               <p className="text-lg font-semibold text-ink">Start a conversation</p>
@@ -130,7 +130,7 @@ export default function Chat() {
               className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               {msg.role === 'assistant' && (
-                <div className="mr-3 mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-teal text-white dark:text-[#0f0f0e]">
+                <div className="mr-3 mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-teal text-on-dark">
                   <MessageText size={18} variant="Bulk" color="var(--color-on-dark)" />
                 </div>
               )}
@@ -155,7 +155,7 @@ export default function Chat() {
           {/* Typing indicator */}
           {loading && (
             <div className="flex justify-start">
-              <div className="mr-3 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-teal text-white dark:text-[#0f0f0e]">
+              <div className="mr-3 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-teal text-on-dark">
                 <MessageText size={18} variant="Bulk" color="var(--color-on-dark)" />
               </div>
               <div className="flex items-center gap-2 rounded-2xl border border-hairline bg-surface-soft px-5 py-4">

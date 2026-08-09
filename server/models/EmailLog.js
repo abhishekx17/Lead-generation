@@ -46,4 +46,4 @@ emailLogSchema.index({ emailAccountId: 1, status: 1 });
 emailLogSchema.index({ campaignId: 1 });
 emailLogSchema.index({ leadId: 1 });
 
-module.exports = mongoose.model('EmailLog', emailLogSchema);
+module.exports = mongoose.models.EmailLog || mongoose.model('EmailLog', emailLogSchema);

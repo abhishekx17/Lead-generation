@@ -3,23 +3,23 @@ import { CancelCircleIcon, InformationCircleIcon, CheckmarkCircle01Icon } from '
 const config = {
   error: {
     icon: CancelCircleIcon,
-    wrap: 'border-[#fca5a5] bg-[#fff1f1] text-[#b91c1c] dark:border-[#7f1d1d] dark:bg-[#2d0a0a] dark:text-[#f87171]',
-    iconClass: 'text-[#ef4444] dark:text-[#f87171]',
+    wrap: 'bg-error/10 text-error border-error/25',
+    iconClass: 'text-error',
   },
   success: {
     icon: CheckmarkCircle01Icon,
-    wrap: 'border-[#86efac] bg-[#f0fdf4] text-[#15803d] dark:border-[#166534] dark:bg-[#052e16] dark:text-[#4ade80]',
-    iconClass: 'text-[#22c55e] dark:text-[#4ade80]',
+    wrap: 'bg-success/10 text-success border-success/25',
+    iconClass: 'text-success',
   },
   info: {
     icon: InformationCircleIcon,
-    wrap: 'border-[#a4d4c5] bg-[#f0faf7] text-[#0f6e56] dark:border-[#1a4a38] dark:bg-[#0a2820] dark:text-[#4ad4b0]',
-    iconClass: 'text-[#1a3a3a] dark:text-[#4ad4b0]',
+    wrap: 'bg-surface-soft text-body border-hairline',
+    iconClass: 'text-body',
   },
   warning: {
     icon: InformationCircleIcon,
-    wrap: 'border-[#fcd34d] bg-[#fffbeb] text-[#92400e] dark:border-[#78350f] dark:bg-[#1c1000] dark:text-[#fbbf24]',
-    iconClass: 'text-[#f59e0b] dark:text-[#fbbf24]',
+    wrap: 'bg-warning/10 text-warning border-warning/25',
+    iconClass: 'text-warning',
   },
 };
 

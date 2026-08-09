@@ -50,20 +50,20 @@ const config = {
   onDark: {
     pending: {
       icon: Clock01Icon,
-      className: 'bg-[#0a1a1a]/15 text-[#0a1a1a]/80 border-[#0a1a1a]/20',
+      className: 'bg-white/10 text-on-dark border-white/15',
     },
     running: {
       icon: Refresh01Icon,
-      className: 'bg-[#0a1a1a]/15 text-[#0a1a1a] border-[#0a1a1a]/25',
+      className: 'bg-success/15 text-success border-success/25',
       spin: true,
     },
     completed: {
       icon: CheckmarkCircle01Icon,
-      className: 'bg-[#0a1a1a]/15 text-[#0a1a1a] border-[#0a1a1a]/25',
+      className: 'bg-success/15 text-success border-success/25',
     },
     failed: {
       icon: CancelCircleIcon,
-      className: 'bg-[#0a1a1a]/20 text-[#0a1a1a] border-[#0a1a1a]/30',
+      className: 'bg-error/15 text-error border-error/25',
     },
   },
 };

@@ -53,4 +53,4 @@ leadSchema.index(
   { unique: true, sparse: true, partialFilterExpression: { email: { $type: 'string', $ne: '' } } }
 );
 
-module.exports = mongoose.model('Lead', leadSchema);
+module.exports = mongoose.models.Lead || mongoose.model('Lead', leadSchema);

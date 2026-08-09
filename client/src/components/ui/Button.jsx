@@ -4,7 +4,7 @@ const variants = {
   secondary:
     'bg-transparent text-ink border border-hairline active:scale-[0.97] hover:bg-surface-soft',
   onColor:
-    'bg-white text-[#0a0a0a] border border-transparent active:scale-[0.97] hover:bg-white/90',
+    'bg-white text-ink border border-transparent active:scale-[0.97] hover:bg-white/90',
   ghost:
     'bg-transparent text-muted border border-transparent hover:bg-surface-soft hover:text-ink active:scale-[0.97]',
   danger:
