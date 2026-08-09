@@ -17,6 +17,11 @@ const campaignSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  searchQuery: {
+    type: String,
+    trim: true,
+    default: "",
+  },
   requiredLeads: {
     type: Number,
     required: true,

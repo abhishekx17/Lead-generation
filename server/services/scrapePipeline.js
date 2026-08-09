@@ -49,6 +49,7 @@ const runScrapePipeline = async (campaignId) => {
       location: campaign.location,
       targetAudience: campaign.targetAudience,
       requiredLeads: campaign.requiredLeads,
+      searchQuery: campaign.searchQuery,
     });
 
     const cleanedLeads = processLeads(rawLeads, campaign.targetAudience);

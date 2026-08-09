@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const Campaign = require('../models/Campaign');
 const Lead = require('../models/Lead');
 const validate = require('../middleware/validate');
+
 const { getChromaClient, toCollectionName } = require('../config/chroma');
 
 const router = express.Router();
@@ -18,6 +19,7 @@ router.post(
     body('name').trim().notEmpty().withMessage('Campaign name is required'),
     body('location').trim().notEmpty().withMessage('Location is required'),
     body('targetAudience').trim().notEmpty().withMessage('Target audience is required'),
+    body('searchQuery').optional().trim(),
     body('requiredLeads')
       .isInt({ min: 10, max: 1000 })
       .withMessage('Required leads must be between 10 and 1000'),
@@ -25,7 +27,7 @@ router.post(
   validate,
   async (req, res, next) => {
     try {
-      const { name, location, targetAudience, requiredLeads } = req.body;
+      const { name, location, targetAudience, requiredLeads, searchQuery } = req.body;
 
       const existing = await Campaign.findOne({ name });
       if (existing) {
@@ -37,6 +39,7 @@ router.post(
         location,
         targetAudience,
         requiredLeads,
+        searchQuery: searchQuery || '',
         status: 'pending',
       });
 
