@@ -35,7 +35,8 @@ export default function EmailLogsModal({ account, onClose }) {
 
   return createPortal(
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-ink/40 backdrop-blur-sm p-4">
-      <div className="relative w-full max-w-4xl overflow-hidden rounded-2xl border border-hairline bg-canvas shadow-2xl flex flex-col max-h-[85vh]">
+      <button type="button" aria-label="Close" className="absolute inset-0 cursor-default" onClick={onClose} />
+      <div role="dialog" aria-modal="true" aria-label={`Outreach logs for ${account.email}`} className="relative w-full max-w-4xl overflow-hidden rounded-2xl border border-hairline bg-canvas shadow-2xl flex flex-col max-h-[85vh]">
         
         {/* Close Button */}
         <button
@@ -52,7 +53,7 @@ export default function EmailLogsModal({ account, onClose }) {
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-teal text-white mb-3">
             <Mail01Icon size={20} />
           </div>
-          <p className="caption-uppercase text-xs font-semibold tracking-wider text-muted">Logs</p>
+          <p className="caption-uppercase text-muted">Logs</p>
           <h3 className="mt-1 text-xl font-semibold tracking-tight text-ink">
             Outreach Logs for {account.email}
           </h3>
@@ -81,10 +82,10 @@ export default function EmailLogsModal({ account, onClose }) {
               <table className="w-full text-left text-sm">
                 <thead>
                   <tr className="border-b border-hairline bg-surface-soft text-muted">
-                    <th className="px-5 py-3.5 caption-uppercase text-[11px] font-semibold tracking-wider">Recipient</th>
-                    <th className="px-5 py-3.5 caption-uppercase text-[11px] font-semibold tracking-wider">Subject</th>
-                    <th className="px-5 py-3.5 caption-uppercase text-[11px] font-semibold tracking-wider">Status</th>
-                    <th className="px-5 py-3.5 caption-uppercase text-[11px] font-semibold tracking-wider">Date</th>
+                    <th className="px-5 py-3.5 caption-uppercase">Recipient</th>
+                    <th className="px-5 py-3.5 caption-uppercase">Subject</th>
+                    <th className="px-5 py-3.5 caption-uppercase">Status</th>
+                    <th className="px-5 py-3.5 caption-uppercase">Date</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -108,7 +109,7 @@ export default function EmailLogsModal({ account, onClose }) {
                         <div className="flex flex-col items-start gap-1">
                           <StatusBadge status={mapStatus(log.status)} />
                           {log.errorMessage && (
-                            <span className="text-[11px] text-danger font-medium max-w-xs truncate" title={log.errorMessage}>
+                            <span className="text-[11px] text-error font-medium max-w-xs truncate" title={log.errorMessage}>
                               {log.errorMessage}
                             </span>
                           )}

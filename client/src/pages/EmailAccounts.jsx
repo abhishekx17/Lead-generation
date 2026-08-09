@@ -196,7 +196,7 @@ export default function EmailAccounts() {
 
                   {/* Disconnected Notice */}
                   {account.status !== 'connected' && (
-                    <div className="mt-6 py-2 px-3 bg-danger/10 border border-danger/10 rounded-xl text-xs text-danger font-medium">
+                    <div className="mt-6 py-2 px-3 bg-error/10 border border-error/10 rounded-xl text-xs text-error font-medium">
                       {account.status === 'error' 
                         ? 'Token refresh failed. Reconnect is required.' 
                         : 'Account disconnected. Reconnect to send emails.'}
@@ -204,7 +204,7 @@ export default function EmailAccounts() {
                   )}
 
                   {/* Actions */}
-                  <div className="mt-6 flex flex-wrap gap-2 border-t border-hairline pt-4 mt-auto">
+                  <div className="mt-auto flex flex-wrap gap-2 border-t border-hairline pt-4">
                     <button
                       type="button"
                       onClick={() => setSelectedAccount(account)}
@@ -217,7 +217,7 @@ export default function EmailAccounts() {
                     <button
                       type="button"
                       onClick={() => handleDisconnect(account._id, account.email)}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-hairline bg-canvas hover:bg-danger/10 hover:text-danger hover:border-danger/10 px-3 py-1.5 text-xs font-semibold text-ink transition-colors cursor-pointer ml-auto"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-hairline bg-canvas hover:bg-error/10 hover:text-error hover:border-error/10 px-3 py-1.5 text-xs font-semibold text-ink transition-colors cursor-pointer ml-auto"
                     >
                       <Delete02Icon size={14} />
                       Disconnect
