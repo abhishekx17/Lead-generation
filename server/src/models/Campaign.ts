@@ -1,10 +1,14 @@
-const mongoose = require("mongoose");
+import mongoose from 'mongoose';
 
 const campaignSchema = new mongoose.Schema({
+  organizationId: {
+    type: String,
+    required: true,
+    index: true,
+  },
   name: {
     type: String,
     required: true,
-    unique: true,
     trim: true,
   },
   location: {
@@ -17,11 +21,6 @@ const campaignSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
-  searchQuery: {
-    type: String,
-    trim: true,
-    default: "",
-  },
   requiredLeads: {
     type: Number,
     required: true,
@@ -29,8 +28,8 @@ const campaignSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["pending", "running", "completed", "failed"],
-    default: "pending",
+    enum: ['pending', 'running', 'completed', 'failed'],
+    default: 'pending',
   },
   totalLeads: {
     type: Number,
@@ -38,7 +37,7 @@ const campaignSchema = new mongoose.Schema({
   },
   sheetUrl: {
     type: String,
-    default: "",
+    default: '',
   },
   createdAt: {
     type: Date,
@@ -46,4 +45,8 @@ const campaignSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("Campaign", campaignSchema);
+// Compound unique: name is unique per org, not globally
+campaignSchema.index({ organizationId: 1, name: 1 }, { unique: true });
+
+const Campaign = mongoose.model('Campaign', campaignSchema);
+export default Campaign;

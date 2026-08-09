@@ -9,12 +9,6 @@ const EMAIL_REGEX = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g;
 const PHONE_REGEX =
   /(?:\+91[\s\-]?)?[6-9]\d{9}|\b[6-9]\d{2}[\s\-]?\d{3}[\s\-]?\d{4}\b/g;
 
-const USER_AGENTS = [
-  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-  "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0",
-];
-
 const PAGE_TIMEOUT = 30000;
 
 class ScraperError extends Error {
@@ -25,15 +19,14 @@ class ScraperError extends Error {
   }
 }
 
-const getRandomUserAgent = () =>
-  USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
 const unique = (arr) => [...new Set(arr.filter(Boolean))];
 
 // ─── Puppeteer helpers ────────────────────────────────────────────────────────
 
 const setupPage = async (browser) => {
   const page = await browser.newPage();
-  await page.setUserAgent(getRandomUserAgent());
+  // The stealth plugin rewrites the UA (strips "HeadlessChrome"); a manually
+  // spoofed UA would contradict the real browser fingerprint and flag us.
   await page.setViewport({ width: 1366, height: 768 });
   await page.setExtraHTTPHeaders({
     "Accept-Language": "en-US,en;q=0.9",
@@ -51,61 +44,127 @@ const setupPage = async (browser) => {
   return page;
 };
 
-// ─── Google Search via Puppeteer ──────────────────────────────────────────────
+// ─── Web search via Puppeteer (multiple engines with fallback) ────────────────
 
-const searchWithPuppeteer = async (page, query, pageNum = 0) => {
-  const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}&s=${pageNum * 30}`;
+const BLOCKED_DOMAINS = [
+  "duckduckgo.com",
+  "bing.com",
+  "brave.com",
+  "google.com",
+  "youtube.com",
+  "facebook.com",
+  "twitter.com",
+  "instagram.com",
+  "wikipedia.org",
+  "linkedin.com",
+  "microsoft.com",
+];
 
-  await page.setUserAgent(getRandomUserAgent());
-  await page.goto(searchUrl, {
+const SEARCH_ENGINES = [
+  {
+    name: "duckduckgo",
+    buildUrl: (query, pageNum) =>
+      `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}&s=${pageNum * 30}`,
+    resultSelector: "a.result__a",
+    blockedMarkers: ["bots use duckduckgo", "complete the following challenge"],
+  },
+  {
+    name: "bing",
+    buildUrl: (query, pageNum) =>
+      `https://www.bing.com/search?q=${encodeURIComponent(query)}&first=${pageNum * 10 + 1}&mkt=en-IN&setlang=en`,
+    resultSelector: "li.b_algo h2 a",
+    blockedMarkers: ["verify you are human", "unusual traffic"],
+  },
+  {
+    name: "brave",
+    buildUrl: (query, pageNum) =>
+      `https://search.brave.com/search?q=${encodeURIComponent(query)}&offset=${pageNum}`,
+    resultSelector: ".snippet a[href^='http'], a.heading-serpresult",
+    blockedMarkers: ["verify you are human", "unusual traffic"],
+  },
+];
+
+// Search engines wrap result URLs in redirects — unwrap to the real site.
+const decodeResultHref = (href) => {
+  try {
+    const url = new URL(href);
+    if (url.hostname.endsWith("duckduckgo.com")) {
+      const uddg = url.searchParams.get("uddg");
+      if (uddg) return decodeURIComponent(uddg);
+    }
+    if (url.hostname.endsWith("bing.com") && url.pathname.startsWith("/ck/")) {
+      const u = url.searchParams.get("u");
+      if (u && u.startsWith("a1")) {
+        return Buffer.from(
+          u.slice(2).replace(/-/g, "+").replace(/_/g, "/"),
+          "base64",
+        ).toString("utf8");
+      }
+    }
+  } catch {
+    // fall through to raw href
+  }
+  return href;
+};
+
+const searchWithEngine = async (page, engine, query, pageNum) => {
+  await page.goto(engine.buildUrl(query, pageNum), {
     waitUntil: "domcontentloaded",
     timeout: PAGE_TIMEOUT,
   });
 
-  const content = await page.content();
-
-  if (content.includes("blocked") || content.includes("captcha")) {
-    throw new ScraperError("Search blocked. Try again later.", "CAPTCHA");
+  const bodyText = (
+    await page.evaluate(() => document.body.innerText)
+  ).toLowerCase();
+  if (engine.blockedMarkers.some((m) => bodyText.includes(m))) {
+    throw new ScraperError(`${engine.name} blocked the search`, "CAPTCHA");
   }
 
-  const links = await page.evaluate(() => {
-    const BLOCKED = [
-      "duckduckgo.com",
-      "youtube.com",
-      "facebook.com",
-      "twitter.com",
-      "instagram.com",
-      "wikipedia.org",
-      "linkedin.com",
-      "google.com",
-    ];
+  const rawHrefs = await page.$$eval(engine.resultSelector, (anchors) =>
+    anchors.map((a) => a.href),
+  );
 
-    // DDG html page uses <a class="result__a"> for organic results
-    const resultAnchors = Array.from(document.querySelectorAll("a.result__a"));
-
-    // fallback: grab all external hrefs
-    const fallback = Array.from(document.querySelectorAll('a[href^="http"]'));
-
-    const anchors = resultAnchors.length ? resultAnchors : fallback;
-
-    return anchors
-      .map((a) => {
-        // DDG wraps real URLs in redirect links — decode them
-        try {
-          const url = new URL(a.href);
-          const uddg = url.searchParams.get("uddg");
-          return uddg ? decodeURIComponent(uddg) : a.href;
-        } catch {
-          return a.href;
-        }
-      })
-      .filter(
-        (href) =>
-          href.startsWith("http") && !BLOCKED.some((b) => href.includes(b)),
-      );
-  });
+  const links = rawHrefs
+    .map(decodeResultHref)
+    .filter(
+      (href) =>
+        href.startsWith("http") &&
+        !BLOCKED_DOMAINS.some((b) => href.includes(b)),
+    );
 
   return [...new Set(links)];
+};
+
+/**
+ * Try each search engine in turn (starting from the last one that worked)
+ * until one returns results. Returns the links and the index of the engine
+ * that produced them so subsequent pages stick with it.
+ */
+const searchWithPuppeteer = async (page, query, pageNum = 0, startIdx = 0) => {
+  let lastError;
+
+  for (let i = 0; i < SEARCH_ENGINES.length; i++) {
+    const engineIdx = (startIdx + i) % SEARCH_ENGINES.length;
+    const engine = SEARCH_ENGINES[engineIdx];
+
+    try {
+      const links = await searchWithEngine(page, engine, query, pageNum);
+      if (links.length) return { links, engineIdx };
+      lastError = new ScraperError(
+        `${engine.name} returned no results`,
+        "EMPTY_RESULTS",
+      );
+    } catch (err) {
+      console.warn(`Search via ${engine.name} failed:`, err.message);
+      lastError = err;
+    }
+
+    await randomDelay(1000, 2000);
+  }
+
+  throw (
+    lastError || new ScraperError("All search engines failed", "EMPTY_RESULTS")
+  );
 };
 
 // ─── Per-site extraction ──────────────────────────────────────────────────────
@@ -164,7 +223,6 @@ const extractFromHtml = (html, pageUrl = "") => {
 };
 
 const fetchBusinessPage = async (page, url) => {
-  await page.setUserAgent(getRandomUserAgent());
   const response = await page.goto(url, {
     waitUntil: "domcontentloaded",
     timeout: PAGE_TIMEOUT,
@@ -178,17 +236,26 @@ const fetchBusinessPage = async (page, url) => {
 
 /**
  * Scrape business leads using Puppeteer directly (no API key needed).
- * @param {{ location: string, targetAudience: string, requiredLeads: number }} params
+ * Searches the web for the given query (or one built from targetAudience +
+ * location), then visits each result site to extract contact details.
+ * @param {{ location?: string, targetAudience?: string, requiredLeads: number, searchQuery?: string }} params
  */
-const scrapeLeads = async ({ location, targetAudience, requiredLeads }) => {
-  if (!location || !targetAudience || !requiredLeads) {
+const scrapeLeads = async ({
+  location,
+  targetAudience,
+  requiredLeads,
+  searchQuery,
+}) => {
+  if (!requiredLeads || (!searchQuery && (!location || !targetAudience))) {
     throw new ScraperError(
-      "location, targetAudience, and requiredLeads are required",
+      "requiredLeads and either searchQuery or location + targetAudience are required",
       "INVALID_INPUT",
     );
   }
 
-  const query = `${targetAudience} in ${location} contact email phone`;
+  const query =
+    searchQuery?.trim() ||
+    `${targetAudience} in ${location} contact email phone`;
   const leads = [];
   const seenEmails = new Set();
   const seenPhones = new Set();
@@ -198,6 +265,7 @@ const scrapeLeads = async ({ location, targetAudience, requiredLeads }) => {
 
   try {
     browser = await puppeteerExtra.launch({
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/brave",
       headless: "new",
       args: [
         "--no-sandbox",
@@ -213,9 +281,10 @@ const scrapeLeads = async ({ location, targetAudience, requiredLeads }) => {
     const searchPage = await setupPage(browser);
     const businessPage = await setupPage(browser);
 
-    // ── Step 1: Collect result links from Google via Puppeteer ──────────────
+    // ── Step 1: Collect result links from web search via Puppeteer ──────────
     const allLinks = [];
     const maxPages = Math.min(5, Math.ceil((requiredLeads * 3) / 10));
+    let engineIdx = 0;
 
     for (
       let pageNum = 0;
@@ -223,14 +292,13 @@ const scrapeLeads = async ({ location, targetAudience, requiredLeads }) => {
       pageNum++
     ) {
       try {
-        const links = await searchWithPuppeteer(searchPage, query, pageNum);
-
-        if (!links.length && pageNum === 0) {
-          throw new ScraperError(
-            "No search results found for this query",
-            "EMPTY_RESULTS",
-          );
-        }
+        const { links, engineIdx: usedIdx } = await searchWithPuppeteer(
+          searchPage,
+          query,
+          pageNum,
+          engineIdx,
+        );
+        engineIdx = usedIdx;
 
         for (const l of links) {
           if (!seenLinks.has(l)) {
@@ -242,7 +310,9 @@ const scrapeLeads = async ({ location, targetAudience, requiredLeads }) => {
         // Delay between search pages to avoid CAPTCHA
         if (pageNum < maxPages - 1) await randomDelay(3000, 6000);
       } catch (err) {
-        if (err.code === "CAPTCHA" || err.code === "EMPTY_RESULTS") throw err;
+        // Abort only if the very first page yields nothing; otherwise keep
+        // whatever links we already collected.
+        if (pageNum === 0) throw err;
         console.warn(`Search page ${pageNum + 1} failed:`, err.message);
         break;
       }

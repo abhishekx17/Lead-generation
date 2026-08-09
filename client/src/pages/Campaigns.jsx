@@ -27,7 +27,7 @@ import Alert from '../components/ui/Alert';
 import { getBrandVariant } from '../lib/brandColors';
 import { gsap } from 'gsap';
 
-const emptyForm = { name: '', location: '', targetAudience: '', requiredLeads: 50 };
+const emptyForm = { name: '', location: '', targetAudience: '', searchQuery: '', requiredLeads: 50 };
 
 export default function Campaigns() {
   const [campaigns, setCampaigns] = useState([]);
@@ -337,6 +337,13 @@ export default function Campaigns() {
                   value={form.targetAudience}
                   onChange={(e) => setForm({ ...form, targetAudience: e.target.value })}
                   placeholder="Restaurants"
+                />
+                <Input
+                  label="Custom Search Query (optional)"
+                  icon={Search01Icon}
+                  value={form.searchQuery}
+                  onChange={(e) => setForm({ ...form, searchQuery: e.target.value })}
+                  placeholder="best rooftop restaurants delhi contact"
                 />
                 <Input
                   label="Required Leads (10–1000)"
