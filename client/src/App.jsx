@@ -3,6 +3,7 @@ import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Campaigns from './pages/Campaigns';
 import Chat from './pages/Chat';
+import EmailAccounts from './pages/EmailAccounts';
 
 export default function App() {
   return (
@@ -12,6 +13,7 @@ export default function App() {
           <Route index element={<Dashboard />} />
           <Route path="campaigns" element={<Campaigns />} />
           <Route path="chat" element={<Chat />} />
+          <Route path="email-accounts" element={<EmailAccounts />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
