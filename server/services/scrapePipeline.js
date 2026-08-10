@@ -6,7 +6,7 @@ const { processLeads, isValidEmail } = require('./dataProcessor');
 const { exportLeadsToSheet } = require('./sheets');
 const { embedLeads } = require('./embeddings');
 
-const saveLeads = async (campaignId, cleanedLeads) => {
+const saveLeads = async (campaign, cleanedLeads) => {
   const saved = [];
 
   for (const lead of cleanedLeads) {
@@ -14,7 +14,8 @@ const saveLeads = async (campaignId, cleanedLeads) => {
 
     try {
       const doc = await Lead.create({
-        campaignId,
+        campaignId: campaign._id,
+        organizationId: campaign.organizationId,
         businessName: lead.businessName,
         email: lead.email,
         phone: lead.phone,
@@ -53,7 +54,7 @@ const runScrapePipeline = async (campaignId) => {
     });
 
     const cleanedLeads = processLeads(rawLeads, campaign.targetAudience);
-    const savedLeads = await saveLeads(campaign._id, cleanedLeads);
+    const savedLeads = await saveLeads(campaign, cleanedLeads);
 
     if (!savedLeads.length) {
       throw new ScraperError('No valid leads remained after cleaning and validation', 'EMPTY_RESULTS');
